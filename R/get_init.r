@@ -424,8 +424,8 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		tmp.b <- sub("LGYSET", "", x=tmp.a)
 		tmp.b <- sub("MUYSET", "muy <- mean(dat$y)", x=tmp.b)
 		tmp.b <- sub("SDYSET", "sdy <- sd(dat$y)", x=tmp.b)
-		tmp.b <- sub("ZSIGSET", "zsgm <- runif(1, .25, .75)", x=tmp.b)
-		tmp.b <- sub("SIGSET", "sgm <- 5*tan(zsgm*pi/2)", x=tmp.b)
+		tmp.b <- sub("ZSIGSET", "zsig <- runif(1, .25, .75)", x=tmp.b)
+		tmp.b <- sub("SIGSET", "sig <- 5*tan(zsig*pi/2)", x=tmp.b)
 		tmp.b <- sub("ZSIG", "zsigma = zsig,", x=tmp.b)
 		tmp.b <- sub("SIG", "sigma = sig,", x=tmp.b)
 	}

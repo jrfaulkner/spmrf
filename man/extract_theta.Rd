@@ -7,14 +7,14 @@
 extract_theta(mfit, obstype = "normal", alpha = 0.05)
 }
 \arguments{
-\item{mfit}{An object containing posterior draws from a \code{bnps} model or \code{rstan::stan} model fit.  The object can be of class 'stanfit', 'array', 'matrix', or 'data.frame'.}
+\item{mfit}{An object containing posterior draws from a \code{bnps} model fit or \code{rstan::stan} model fit.  The object can be of class 'stanfit', 'array', 'matrix', or 'data.frame'.}
 
-\item{obstype}{Distribution name of observations.  This controls the back-transformation of the process parameters.  Possible obstypes are 'normal', 'poisson', or 'binomial'.}
+\item{obstype}{Character string with the name of the probability distribution of the observations.  This controls the back-transformation of the process parameters.  Possible values for \code{obstype} are 'normal', 'poisson', or 'binomial'.}
 
-\item{alpha}{Controls level for (1-alpha) Bayesian credible intervals.}
+\item{alpha}{Controls level for 100*(1-\code{alpha})\% Bayesian credible intervals. Values must be 0 < \code{alpha} < 1.}
 }
 \value{
-Returns the posterior median and posterior (1-alpha) quantiles of theta.
+Returns a list with the posterior median and posterior (1-\code{alpha}) quantiles of the theta parameter vector.
 }
 \description{
 Extract theta (latent process) parameters from an object with posterior draws and associated Bayesian credible intervals.

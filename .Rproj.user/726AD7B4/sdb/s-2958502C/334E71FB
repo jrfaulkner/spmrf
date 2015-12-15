@@ -1,0 +1,17 @@
+{
+    "contents" : "Package: bnps\nType: Package\nTitle: Bayesian Nonparametric Adaptive Smoothing\nVersion: 0.1\nDate: 2015-12-14\nAuthor: James Faulkner\nMaintainer: James Faulkner <jfaulknr@uw.edu>\nDescription: Contains functions for fitting Bayesian nonparametric adpative smoothing using the rstan package.\nDepends:\n    R (>= 3.0.1),\n    rstan (>= 2.6.0)\nVignettes: introduction, coal_mining_example, tokyo_rain_example\nLicense: GPL-3\nLazyData: TRUE\nNeedsCompilation: yes\nRoxygenNote: 5.0.1\n",
+    "created" : 1450207511355.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2198346938",
+    "id" : "334E71FB",
+    "lastKnownWriteTime" : 1450207594,
+    "path" : "~/Classes/Research/packages/bnps/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "dcf"
+}

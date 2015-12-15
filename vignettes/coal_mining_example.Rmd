@@ -1,0 +1,50 @@
+---
+title: "Data Example:  Fitting the Bayesian Trend Filter to the Coal Mine Disaster Data"
+output:
+  html_document:
+    theme: united
+    toc: yes
+    mathjax: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+
+
+
+See the [Introduction to the bnps package](introduction.Rmd)
+
+## Coal Mining Example
+Here we provide the code to reproduce the results from the example on coal mine disasters given in Faulkner and Minin (2015).  
+
+
+### Data
+
+The data are number of disasters per year for the years 1851-1962.  The following code sets up a vector of the annual event counts and then creates a list with the data components needed for the models to run.
+
+```{r eval=FALSE}
+ncount <- c(4,5,4,1,0,4,3,4,0,6,3,3,4,0,2,6,3,3,5,4,5,3,1,4,4,1,5,5,3,4,2,5,2,2,3,4,2,1,3,2,2,1,1,1,1,3,0,0,1,0,1,1,0,0,3,1,0,3,2,2,0,1,1,1,0,1,0,1,0,0,0,2,1,0,0,0,1,1,0,2,3,3,1,1,2,1,1,1,1,2,3,3,0,0,0,1,4,0,0,0,1,0,0,0,0,0,1,0,0,1,0,1)
+
+coal_dat <- list(J = length(ncount), y = ncount)
+
+```
+
+### Run Models
+
+In the paper we compare three different configurations for the prior distributions on the order-*k* differences in latent function values (normal, Laplace, and horseshoe).
+
+
+
+
+
+### Posterior Plots
+
+
+
+## References
+
+Faulkner, J.R., and V.N. Minin.  2015.  Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. arXiv preprint.
+
+
+
+

@@ -20,6 +20,6 @@ A function for generating initial parameter seeds for passage to stan. Parameter
 Creates a function for passing to stan which generates initial parameter seeds.
 }
 \seealso{
-getModel, rstan::stan
+get_model, rstan::stan
 }
 

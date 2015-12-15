@@ -17,12 +17,15 @@ get_model(prior = "horseshoe", likelihood = "normal", order = 1,
 \item{zeta}{The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.}
 }
 \value{
-A function for generating initial parameter seeds for passage to stan. Parameters are appropriate to a model with specified prior, likelihood, and order.
+A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
 }
 \description{
-Generates a text string of code describing the model of interest for passage to the stan function in the rstan package.
+Generates a text string of code describing the model of interest for passage to the \code{stan} function in the rstan package.  This function is called internally in the \code{bnps} function.
+}
+\details{
+This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{bnps} function internally, so it is not necessary to use \code{get_model} external to \code{bnps}.
 }
 \seealso{
-getInit, rstan::stan
+bnps, get_init, rstan::stan
 }
 

@@ -2,14 +2,27 @@
 % Please edit documentation in R/bnps.r
 \name{bnps}
 \alias{bnps}
-\title{Fit Bayesian nonparametric adaptive smoothing model}
+\title{Fit Bayesian nonparametric adaptive smoothing model with stan}
 \usage{
-bnps(initialize = FALSE, likelihood = "normal", prior = "normal",
-  order = 1, zeta = 0.01, file, model_name = "anon_model",
-  model_code = "", fit = NA, data = list(), pars = NA, chains = 4,
-  iter = 2000, warmup = floor(iter/2), thin = 1, init = "random", ...)
+bnps(prior = "horseshoe", likelihood = "normal", order = 1, zeta = 0.01,
+  ...)
+}
+\arguments{
+\item{prior}{A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".}
+
+\item{likelihood}{A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".}
+
+\item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
+
+\item{zeta}{The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.}
+}
+\value{
+An object of class 'stanfit'.
 }
 \description{
-Fit Bayesian nonparametric adaptive smoothing model
+Fit Bayesian nonparametric adaptive smoothing model with stan
+}
+\seealso{
+get_model, get_init, rstan::stan
 }
 

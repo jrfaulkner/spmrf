@@ -1,15 +1,16 @@
-Package: bsmooth
+Package: bnps
 Type: Package
-Title: Bayesian Adaptive Nonparametric Smoothing
+Title: Bayesian Nonparametric Adaptive Smoothing
 Version: 0.1
-Date: 2015-12-02
+Date: 2015-12-14
 Author: James Faulkner
-Maintainer: James Faulkner <jim.faulkner@noaa.gov>
-Description: Contains functions for generating model code for use with the
-    rstan package. Models perform adaptive nonparametric smoothing in a Bayesian
-    framework.
+Maintainer: James Faulkner <jfaulknr@uw.edu>
+Description: Contains functions for fitting Bayesian nonparametric adpative smoothing using the rstan package.
 Depends:
-    R (>= 3.0.1)
+    R (>= 3.0.1),
+    rstan (>= 2.6.0)
+Vignettes: introduction, coal_mining_example, tokyo_rain_example
 License: GPL-3
 LazyData: TRUE
+NeedsCompilation: yes
 RoxygenNote: 5.0.1
