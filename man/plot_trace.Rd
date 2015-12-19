@@ -8,7 +8,7 @@ plot_trace(postob, vname, pscale = "original", stack = FALSE,
   colset = "color")
 }
 \arguments{
-\item{postob}{An array containing posterior draws from a \code{bnps} model fit or \code{rstan::stan} model fit.  Model fit objects of type 'stanfit' can be coerced into arrays using either the 'extract' or 'as.array' functions from the \code{rstan} package.}
+\item{postob}{An array containing posterior draws from a \code{bnps} model fit or \code{stan} model fit.  Model fit objects of type \code{stanfit} can be coerced into arrays using either the \code{extract} or \code{as.array.stanfit} functions from the \pkg{rstan} package.}
 
 \item{vname}{Name of variable to plot.  Name must correspond to a dimname in the array.}
 
@@ -19,9 +19,12 @@ plot_trace(postob, vname, pscale = "original", stack = FALSE,
 \item{colset}{Color scheme for plotting traces by chain.  Schemes 'color' and 'gray' will produce separate colors or gray shades for each chain, and scheme 'black' will make all chain traces black.}
 }
 \value{
-Returns a plot object
+Returns a \code{plot} object
 }
 \description{
 Plots the posterior draws of a specified parameter by MCMC iteration with options for visual differentiation of separate chains.
+}
+\seealso{
+\code{\link[rstan]{stanfit}}, \code{\link[rstan]{extract}}, \code{\link[rstan]{as.array.stanfit}}, \code{\link{bnps}}
 }
 

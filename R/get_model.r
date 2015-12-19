@@ -1,13 +1,13 @@
 #' Generate model code for passage to stan
 #'
-#' Generates a text string of code describing the model of interest for passage to the \code{stan} function in the rstan package.  This function is called internally in the \code{bnps} function.
+#' Generates a text string of code describing the model of interest for passage to the \code{stan} function in the \pkg{rstan} package.  This function is called internally in the \code{bnps} function.
 #' @param prior A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".
 #' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3).
 #' @param zeta The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.
 #' @return A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
 #' @details This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{bnps} function internally, so it is not necessary to use \code{get_model} external to \code{bnps}.
-#' @seealso bnps, get_init, rstan::stan
+#' @seealso \code{\link{bnps}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
 #' @export
 
 
@@ -44,25 +44,19 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau[J-1];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		vector[J-1] tau;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10.0*tan(zomega1*pi()/2);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 		   tau[j] <- gam*tan(ztau[j]*pi()/2);
 	 	   theta[j+1] <- zdelta[j]*tau[j] + theta[j];
@@ -71,8 +65,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		ztau ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
 		zdelta ~ normal(0, 1);
@@ -98,25 +90,19 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau2[J-1];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		vector[J-1] tau;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 	  	   tau[j] <- gam*sqrt(-2*log(1-ztau2[j]));
 	 	   theta[j+1] <- zdelta[j]*tau[j] + theta[j];
@@ -125,8 +111,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		ztau2 ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
 		zdelta ~ normal(0, 1);
@@ -154,23 +138,17 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 	 	   theta[j+1] <- gam*zdelta[j] + theta[j];
 		}
@@ -178,8 +156,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
 		zdelta ~ normal(0, 1);
 		LIKESTATE
@@ -207,28 +183,22 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau[J-2];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		real <lower=0, upper=1> zptau2;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		vector[J-2] tau;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10.0*tan(zomega1*pi()/2);
 		ptau2 <- (1/sqrt(3.0))*tan(zptau2*pi()/2);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
 	   	   tau[j] <- gam*tan(ztau[j]*pi()/2);
@@ -238,8 +208,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		zptau2 ~ uniform(0, 1);
 		ztau ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
@@ -267,28 +235,22 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau2[J-2];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		real <lower=0, upper=1> zptau2;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		vector[J-2] tau;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
 		ptau2 <- gam*sqrt(-(2.0/3.0)*log(1-zptau2));
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
 		   tau[j] <- gam*sqrt(-2*log(1-ztau2[j]));
@@ -298,8 +260,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		zptau2 ~ uniform(0, 1);
 		ztau2 ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
@@ -326,25 +286,19 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
 		ptau2 <- gam*sqrt(1.0/3.0);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
 	 	   theta[j+2] <- gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
@@ -353,8 +307,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
 		zdelta ~ normal(0, 1);
 		LIKESTATE
@@ -382,19 +334,15 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau[J-3];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		real <lower=0, upper=1> zptau2;
 		real <lower=0, upper=1> zptau3;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		real <lower=0> ptau3;
 		vector[J-3] tau;
@@ -402,11 +350,9 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10.0*tan(zomega1*pi()/2);
 		ptau2 <- gam*sqrt(1.0/10.0)*tan(zptau2*pi()/2);
 		ptau3 <- gam*sqrt(3.0/10.0)*tan(zptau3*pi()/2);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -417,8 +363,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		zptau2 ~ uniform(0, 1);
 		zptau3 ~ uniform(0, 1);
 		ztau ~ uniform(0, 1);
@@ -446,19 +390,15 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> ztau2[J-3];
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		real <lower=0, upper=1> zptau2;
 		real <lower=0, upper=1> zptau3;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		real <lower=0> ptau3;
 		vector[J-3] tau;
@@ -466,11 +406,9 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
 		ptau2 <- gam*sqrt(-(1.0/5.0)*log(1-zptau2));
 		ptau3 <- gam*sqrt(-(3.0/5.0)*log(1-zptau3));
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -481,8 +419,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		zptau2 ~ uniform(0, 1);
 		zptau3 ~ uniform(0, 1);
 		ztau2 ~ uniform(0, 1);
@@ -512,27 +448,21 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
-		real zmuth1;
 		real <lower=0, upper=1> zgam;
-		real <lower=0, upper=1> zomega1;
 		//SIGPARM
 	  }
 	  transformed parameters{
 	    vector[J] theta;
-		real muth1;
 		real <lower=0> gam;
-		real <lower=0> omega1;
 		real <lower=0> ptau2;
 		real <lower=0> ptau3;
 		//SIGTPARM
 
 		//SIGSET
 		gam <- ZETAVAL*tan(zgam*pi()/2);
-		omega1 <- 10*tan(zomega1*pi()/2);
 		ptau2 <- gam*sqrt(1.0/10.0);
 		ptau3 <- gam*sqrt(3.0/10.0);
-		muth1 <- sdy*zmuth1 + muy;
-		theta[1] <- omega1*ztheta1 + muth1;
+		theta[1] <- 2*sdy*ztheta1 + muy;
 		theta[2] <- ptau2*zdelta[1] + theta[1];
 		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -542,8 +472,6 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  model {
 		//ZSIGSTATE
 		zgam ~ uniform(0, 1);
-		zmuth1 ~ normal(0, 1);
-		zomega1 ~ uniform(0, 1);
 		ztheta1 ~ normal(0, 1);
 		zdelta ~ normal(0, 1);
 		LIKESTATE

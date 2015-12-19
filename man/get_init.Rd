@@ -7,19 +7,19 @@
 get_init(prior = "horseshoe", likelihood = "normal", order = 1)
 }
 \arguments{
-\item{prior}{A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".}
+\item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".}
 
 \item{likelihood}{A character string specifying the distribution of the observations. Choices are "normal", "poisson", and "binomial".}
 
 \item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
 }
 \value{
-A function for generating initial parameter seeds for passage to stan. Parameters are appropriate to a model with specified prior, likelihood, and order.
+An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{bnps}. Parameters are appropriate to a model with specified prior, likelihood, and order.
 }
 \description{
-Creates a function for passing to stan which generates initial parameter seeds.
+Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{bnps}.
 }
 \seealso{
-get_model, rstan::stan
+\code{\link{bnps}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 }
 

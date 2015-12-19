@@ -1,11 +1,11 @@
 #' Extract latent process parameters and associated Bayesian credible intervals
 #'
 #' Extract theta (latent process) parameters from an object with posterior draws and associated Bayesian credible intervals.
-#' @param mfit An object containing posterior draws from a \code{bnps} model fit or \code{rstan::stan} model fit.  The object can be of class 'stanfit', 'array', 'matrix', or 'data.frame'.
+#' @param mfit An object containing posterior draws from a \code{bnps} model fit or \code{stan} model fit.  The object can be of class \code{stanfit}, \code{array}, \code{matrix}, or \code{data.frame}.
 #' @param obstype Character string with the name of the probability distribution of the observations.  This controls the back-transformation of the process parameters.  Possible values for \code{obstype} are 'normal', 'poisson', or 'binomial'.
 #' @param alpha Controls level for 100*(1-\code{alpha})\% Bayesian credible intervals. Values must be 0 < \code{alpha} < 1.
 #' @return Returns a list with the posterior median and posterior (1-\code{alpha}) quantiles of the theta parameter vector.
-#' @seealso rstan, rstan::as.array, rstan::as.matrix, rstan::as.data.frame
+#' @seealso \code{\link[rstan]{stan}}, \code{\link[rstan]{as.array.stanfit}}, \code{\link[rstan]{as.matrix.stanfit}}, \code{\link[rstan]{as.data.frame.stanfit}}, \code{\link{bnps}}
 #' @export
 
 extract_theta <- function(mfit, obstype="normal",  alpha=0.05){
@@ -29,11 +29,23 @@ extract_theta <- function(mfit, obstype="normal",  alpha=0.05){
 	      tmp.th1 <- rbind(tmp.th1, mfit[ ,jj,])
 	    }
 	  }
-	  tmp.th <- tmp.th1[ ,grep(x=dimnames(tmp.th1)[[2]], pattern="theta")]
+	  ath <-  grep(x=dimnames(tmp.th1)[[2]], pattern="theta")
+	  zth <-  grep(x=dimnames(tmp.th1)[[2]], pattern="ztheta")
+	  thind <- setdiff(ath, zth)
+	  tmp.th <- tmp.th1[ , thind]
   }
-  if (class(mfit)[1]=="matrix") tmp.th <- mfit[ , grep(x=colnames(mfit), pattern="theta")]
-  if (class(mfit)[1]=="data.frame") tmp.th <- as.matrix(mfit[ , grep(x=names(mfit), pattern="theta")])
-
+  if (class(mfit)[1]=="matrix"){
+  	ath <-  grep(x=colnames(mfit), pattern="theta")
+  	zth <-  grep(x=colnames(mfit), pattern="ztheta")
+  	thind <- setdiff(ath, zth)
+  	tmp.th <- mfit[ , thind]
+  }
+  if (class(mfit)[1]=="data.frame") {
+  	ath <-  grep(x=names(mfit), pattern="theta")
+  	zth <-  grep(x=names(mfit), pattern="ztheta")
+  	thind <- setdiff(ath, zth)
+  	tmp.th <- as.matrix(mfit[ , thind])
+  }
   plow <- alpha/2
   phigh <- 1 - alpha/2
 

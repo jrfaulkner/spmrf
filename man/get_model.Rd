@@ -20,12 +20,12 @@ get_model(prior = "horseshoe", likelihood = "normal", order = 1,
 A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
 }
 \description{
-Generates a text string of code describing the model of interest for passage to the \code{stan} function in the rstan package.  This function is called internally in the \code{bnps} function.
+Generates a text string of code describing the model of interest for passage to the \code{stan} function in the \pkg{rstan} package.  This function is called internally in the \code{bnps} function.
 }
 \details{
 This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{bnps} function internally, so it is not necessary to use \code{get_model} external to \code{bnps}.
 }
 \seealso{
-bnps, get_init, rstan::stan
+\code{\link{bnps}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
 }
 

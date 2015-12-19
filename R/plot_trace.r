@@ -1,12 +1,13 @@
 #' Plot traces of posterior draws of a parameter
 #'
 #' Plots the posterior draws of a specified parameter by MCMC iteration with options for visual differentiation of separate chains.
-#' @param postob An array containing posterior draws from a \code{bnps} model fit or \code{rstan::stan} model fit.  Model fit objects of type 'stanfit' can be coerced into arrays using either the 'extract' or 'as.array' functions from the \code{rstan} package.
+#' @param postob An array containing posterior draws from a \code{bnps} model fit or \code{stan} model fit.  Model fit objects of type \code{stanfit} can be coerced into arrays using either the \code{extract} or \code{as.array.stanfit} functions from the \pkg{rstan} package.
 #' @param vname Name of variable to plot.  Name must correspond to a dimname in the array.
 #' @param pscale Plotting scale. Options are 'original', 'log', or 'inv' (inverse).
 #' @param stack Indicator to plot chains separately and stack the plots.
 #' @param colset Color scheme for plotting traces by chain.  Schemes 'color' and 'gray' will produce separate colors or gray shades for each chain, and scheme 'black' will make all chain traces black.
-#' @return Returns a plot object
+#' @return Returns a \code{plot} object
+#' @seealso \code{\link[rstan]{stanfit}}, \code{\link[rstan]{extract}}, \code{\link[rstan]{as.array.stanfit}}, \code{\link{bnps}}
 #' @export
 
 

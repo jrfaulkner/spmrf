@@ -1,11 +1,11 @@
 #' Generate function for initial parameter values
 #'
-#' Creates a function for passing to stan which generates initial parameter seeds.
-#' @param prior A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".
+#' Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{bnps}.
+#' @param prior A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".
 #' @param likelihood A character string specifying the distribution of the observations. Choices are "normal", "poisson", and "binomial".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3).
-#' @return A function for generating initial parameter seeds for passage to stan. Parameters are appropriate to a model with specified prior, likelihood, and order.
-#' @seealso get_model, rstan::stan
+#' @return An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{bnps}. Parameters are appropriate to a model with specified prior, likelihood, and order.
+#' @seealso \code{\link{bnps}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 #' @export
 
 get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
@@ -26,17 +26,13 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-1, 0.25, .75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-1)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		for (zz in 1:(dat$J-1)){
 			tu[zz] <- gm*tan(ztau[zz]*pi/2)
 			tth[zz+1] <- zdel[zz]*tu[zz] + tth[zz]
@@ -44,15 +40,11 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zgam = zgm,
 			ztau = ztau,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			tau = tu
 			)
 	}'
@@ -65,17 +57,13 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-1, 0.25, .75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-1)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		for (zz in 1:(dat$J-1)){
 			tu[zz] <- gm*sqrt(-2*log(1-zta2[zz]))
 			tth[zz+1] <- zdel[zz]*tu[zz] + tth[zz]
@@ -83,15 +71,11 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zgam = zgm,
 			ztau2 = zta2,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			tau = tu
 			)
 	}'
@@ -105,29 +89,21 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		tth <- numeric(dat$J)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		for (zz in 1:(dat$J-1)){
 			tth[zz+1] <- gm*zdel[zz] + tth[zz]
 		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zgam = zgm,
 			SIG
 			gam = gm,
-			theta = tth,
-			muth1 = mt1,
-			omega1 = om1
+			theta = tth
 			)
 	}'
 
@@ -141,19 +117,15 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-2, 0.25, .75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- gm*sqrt(1/3)*tan(zpt2*pi/2)
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-2)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		for (zz in 1:(dat$J-2)){
 			tu[zz] <- gm*tan(ztau[zz]*pi/2)
@@ -162,16 +134,12 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zptau2 = zpt2,
 			zgam = zgm,
 			ztau = ztau,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2,
 			tau = tu
 			)
@@ -187,19 +155,15 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-2, 0.25, 0.75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- gm*sqrt(-(2/3.0)*log(1-zpt2))
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-1)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		for (zz in 1:(dat$J-2)) {
 			tu[zz] <- gm*sqrt(-2*log(1-zta2[zz]))
@@ -208,16 +172,12 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zptau2 = zpt2,
 			zgam = zgm,
 			ztau2 = zta2,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2,
 			tau = tu
 			)
@@ -231,16 +191,12 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- (gm/sqrt(3))
 		tth <- numeric(dat$J)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		for (zz in 1:(dat$J-2)){
 			tth[zz+2] <- gm*zdel[zz+1] + 2*tth[zz+1] - tth[zz]
@@ -248,14 +204,10 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zgam = zgm,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2
 			)
 	}'
@@ -271,21 +223,17 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zpt3 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-3, 0.25, .75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- gm*sqrt(1/10)*tan(zpt2*pi/2)
 		pt3 <- gm*sqrt(3/10)*tan(zpt3*pi/2)
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-3)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
 		for (zz in 1:(dat$J-3)){
@@ -295,8 +243,6 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zptau2 = zpt2,
 			zptau3 = zpt3,
 			zgam = zgm,
@@ -304,8 +250,6 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2,
 			ptau3 = pt3,
 			tau = tu
@@ -321,21 +265,17 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zpt3 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-3, 0.25, 0.75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- gm*sqrt(-(1/5.0)*log(1-zpt2))
 		pt3 <- gm*sqrt(-(3/5.0)*log(1-zpt3))
 		tth <- numeric(dat$J)
 		tu <- numeric(dat$J-3)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
 		for (zz in 1:(dat$J-3)) {
@@ -345,8 +285,6 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zptau2 = zpt2,
 			zptau3 = zpt3,
 			zgam = zgm,
@@ -354,8 +292,6 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2,
 			ptau3 = pt3,
 			tau = tu
@@ -370,17 +306,13 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
-		zm1 <- runif(1, -1, 1)
-		zom1 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		SIGSET
 		gm <- 0.1*tan(zgm*pi/2)
-		mt1 <- sdy*zm1 + muy
-		om1 <- tan(zom1*pi/2)
 		pt2 <- gm*sqrt(1/10)
 		pt3 <- gm*sqrt(3/10)
 		tth <- numeric(dat$J)
-		tth[1] <- om1*zth1 + mt1
+		tth[1] <- 2*sdy*zth1 + muy
 		tth[2] <- pt2*zdel[1] + tth[1]
 		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
 		for (zz in 1:(dat$J-3)){
@@ -389,16 +321,12 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zmuth1 = zm1,
-			zomega1 = zom1,
 			zgam = zgm,
 			SIG
 			gam = gm,
 			theta = tth,
-			muth1 = mt1,
-			omega1 = om1,
 			ptau2 = pt2,
-			ptau3 = pt3,
+			ptau3 = pt3
 			)
 	}'
 
