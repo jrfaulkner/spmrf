@@ -14,7 +14,6 @@ The following vignettes provide some examples using the `bnps` package with step
 
 1. **Introduction_to_bnps**
 2. **coal_mine_example**
-3. **tokyo_rain_example**
 
 ## References
 Faulkner, J. R., and V. N. Minin. 2015. Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. arXiv preprint.
