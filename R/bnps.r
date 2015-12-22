@@ -20,7 +20,7 @@
 #'
 #' \code{bnps} can also be used to sample again from a fitted model under different settings (e.g., different \code{iter}) by providing argument \code{fit}. In this case, the compiled C++ code for the model is reused.
 #' @return An object of class \code{stanfit}.  See \code{stanfit} and \code{stan} for more details.
-#' @references Faulkner, J. R., and V. N. Minin. 2015. Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. \emph{arXiv preprint}.
+#' @references Faulkner, J. R., and V. N. Minin. 2015. Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. \emph{arXiv} preprint arXiv:1512.06505.
 #' @seealso \code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, and \code{\link{get_init}}
 #' @export
 
