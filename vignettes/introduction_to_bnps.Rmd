@@ -320,7 +320,7 @@ ivsfit.H <- bnps(prior="horseshoe", likelihood="normal", order=2, data=vsdat.nor
 
 # Run model separately per chain -- one per core
 tmp.sflist.H <- mclapply(1:nchain, mc.cores = nchain, function(xx) bnps(prior="horseshoe",
-							fit=likelihood="normal", order=2, fit=ivsfit.H, data=vsdat.norm, par=pars.H, 
+							likelihood="normal", order=2, fit=ivsfit.H, data=vsdat.norm, par=pars.H, 
 							chains=1, warmup=nburn,	thin=nthin, iter=niter, chain_id=chnlist[xx], refresh=-1) )
 
 # Convert list to stanfit object
