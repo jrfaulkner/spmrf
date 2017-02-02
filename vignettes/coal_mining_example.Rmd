@@ -1,5 +1,5 @@
 ---
-title: "Using `bnps` with the Coal Mine Disaster Data"
+title: "Using `spmrf` with the Coal Mine Disaster Data"
 author: "James Faulkner"
 output: rmarkdown::html_vignette
 vignette: >
@@ -10,25 +10,25 @@ vignette: >
 
 
 
-The following document provides `R` code for fitting Bayesian trend filter models using the `bnps` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2015). See the [Introduction to the bnps package](introduction_to_bnps.html) for instructions on installation and more details about the package.
+The following document provides `R` code for fitting Bayesian trend filter models using the `spmrf` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2015). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
 
 
 ## Data
 
-The data are number of disasters per year for the years 1851-1962.  The following code loads the `coal` data frame and creates a list with the data components needed for `bnps` to run the models.  See the package documentation for more details on the coal data set.
+The data are number of disasters per year for the years 1851-1962.  The following code loads the `coal` data frame and creates a list with the data components needed for `spmrf` to run the models.  See the package documentation for more details on the coal data set.
 
 ```{r eval=FALSE}
 # load coal data
 data(coal)
 
-# set up data list for bnps
+# set up data list for spmrf
 coal_dat <- list(J = nrow(coal), y = coal$events)
 
 ```
 
 ## Run Models
 
-In the paper we compare three different configurations for the prior distributions on the order-*k* differences in latent function values (normal, Laplace, and horseshoe).  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `bnps` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  Note that the normal model takes about 5 seconds to run per chain, the Laplace model about 20-30 seconds per chain, and the horseshoe about 40-50 seconds per chain.  Of course results will differ depending on your computer set up. 
+In the paper we compare three different configurations for the prior distributions on the order-*k* differences in latent function values (normal, Laplace, and horseshoe).  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `spmrf` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  Note that the normal model takes about 5 seconds to run per chain, the Laplace model about 20-30 seconds per chain, and the horseshoe about 40-50 seconds per chain.  Of course results will differ depending on your computer set up. 
 
 
 ```{r eval=FALSE}
@@ -45,11 +45,11 @@ nburn <- 500
 niter <- (ntotsamp/nchain)*nthin + nburn
 
 # Run models
-cfit.N <- bnps(prior="normal", likelihood="poisson", order=1, data=coal_dat, par=pars.N, 
+cfit.N <- spmrf(prior="normal", likelihood="poisson", order=1, data=coal_dat, par=pars.N, 
 					chains=nchain, warmup=nburn, thin=nthin, iter=niter)
-cfit.L <- bnps(prior="laplace", likelihood="poisson", order=1, data=coal_dat, par=pars.L, 
+cfit.L <- spmrf(prior="laplace", likelihood="poisson", order=1, data=coal_dat, par=pars.L, 
 					chains=nchain, warmup=nburn, thin=nthin, iter=niter)
-cfit.H <- bnps(prior="horseshoe", likelihood="poisson", order=1, data=coal_dat, par=pars.H, 
+cfit.H <- spmrf(prior="horseshoe", likelihood="poisson", order=1, data=coal_dat, par=pars.H, 
 					chains=nchain, warmup=nburn, thin=nthin, iter=niter)
 
 # Extract posterior draws
@@ -66,7 +66,7 @@ th.H <- extract_theta(cfit.H, obstype="poisson")
 
 ## Diagnostics
 
-Next we check some posterior diagnostics of the parameters.  The `print.stanfit` function (called with `print`) from the `rstan` package provides posterior summaries of the parameters and effective sample size estimates and Gelman-Rubin statistics.  We use the `plot_trace` function from the `bnps` package to check the traces of a few parameters for the horseshoe model.  Two of those plots are shown below. 
+Next we check some posterior diagnostics of the parameters.  The `print.stanfit` function (called with `print`) from the `rstan` package provides posterior summaries of the parameters and effective sample size estimates and Gelman-Rubin statistics.  We use the `plot_trace` function from the `spmrf` package to check the traces of a few parameters for the horseshoe model.  Two of those plots are shown below. 
 
 ```{r eval=FALSE}
 
@@ -89,7 +89,7 @@ plot_trace(cout.H, "gam", pscale="log", stack=TRUE, colset="black")
 
 ## Posterior Plots
 
-Now we use the `plot_trend` function from the `bnps` package to plot the posterior medians and 95% credible intervals for the three models along with the data points.  See the documentation for `plot_trend` for more details on the available options.  The code below produces a PNG file, but you can simply pull out the calls to `plot_trend` for your own use.
+Now we use the `plot_trend` function from the `spmrf` package to plot the posterior medians and 95% credible intervals for the three models along with the data points.  See the documentation for `plot_trend` for more details on the available options.  The code below produces a PNG file, but you can simply pull out the calls to `plot_trend` for your own use.
 
 ```{r eval=FALSE}
 

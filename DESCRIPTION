@@ -1,13 +1,13 @@
-Package: bnps
+Package: spmrf
 Type: Package
 Title: Bayesian Nonparametric Adaptive Smoothing
-Description: Contains functions for fitting Bayesian nonparametric adpative smoothing models using the rstan package.
+Description: Contains functions for fitting Bayesian nonparametric adpative smoothing models with shrinkage prior Markov random fields (SPMRF) using the rstan package.
 Version: 0.1
 Date: 2015-12-15
 Author: James Faulkner
 Maintainer: James Faulkner <jfaulknr@uw.edu>
-URL: http://github.com/jrfaulkner/bnps
-BugReports: http://github.com/jrfaulkner/bnps/issues
+URL: http://github.com/jrfaulkner/spmrf
+BugReports: http://github.com/jrfaulkner/spmrf/issues
 Depends: R (>= 3.0.1)
 Imports: rstan (>= 2.6.0)
 Suggests: knitr,

@@ -14,12 +14,12 @@ get_init(prior = "horseshoe", likelihood = "normal", order = 1)
 \item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
 }
 \value{
-An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{bnps}. Parameters are appropriate to a model with specified prior, likelihood, and order.
+An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{spmrf}. Parameters are appropriate to a model with specified prior, likelihood, and order.
 }
 \description{
-Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{bnps}.
+Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{spmrf}.
 }
 \seealso{
-\code{\link{bnps}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
+\code{\link{spmrf}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 }
 
