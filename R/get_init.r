@@ -1,11 +1,11 @@
 #' Generate function for initial parameter values
 #'
-#' Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{bnps}.
+#' Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{spmrf}.
 #' @param prior A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".
 #' @param likelihood A character string specifying the distribution of the observations. Choices are "normal", "poisson", and "binomial".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3).
-#' @return An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{bnps}. Parameters are appropriate to a model with specified prior, likelihood, and order.
-#' @seealso \code{\link{bnps}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
+#' @return An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{spmrf}. Parameters are appropriate to a model with specified prior, likelihood, and order.
+#' @seealso \code{\link{spmrf}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 #' @export
 
 get_init <- function(prior="horseshoe", likelihood="normal", order=1) {

@@ -1,13 +1,13 @@
 #' Generate model code for passage to stan
 #'
-#' Generates a text string of code describing the model of interest for passage to the \code{stan} function in the \pkg{rstan} package.  This function is called internally in the \code{bnps} function.
+#' Generates a text string of code describing the model of interest for passage to the \code{stan} function in the \pkg{rstan} package.  This function is called internally in the \code{spmrf} function.
 #' @param prior A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".
 #' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3).
 #' @param zeta The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.
 #' @return A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
-#' @details This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{bnps} function internally, so it is not necessary to use \code{get_model} external to \code{bnps}.
-#' @seealso \code{\link{bnps}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
+#' @details This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{spmrf} function internally, so it is not necessary to use \code{get_model} external to \code{spmrf}.
+#' @seealso \code{\link{spmrf}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
 #' @export
 
 
