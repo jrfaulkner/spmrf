@@ -12,7 +12,7 @@ This repository houses the `R` package `spmrf`, which is used for fitting Bayesi
 ## Vignettes
 The following vignettes provide some examples using the `spmrf` package with step-by-step instructions and R code. 
 
-1. **Introduction_to_spmrf**
+1. [Introduction_to_spmrf](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/introduction_to_spmrf.Rmd)
 2. **coal_mine_example**
 
 ## References
