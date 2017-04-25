@@ -20,12 +20,12 @@
 #'
 #' \code{spmrf} can also be used to sample again from a fitted model under different settings (e.g., different \code{iter}) by providing argument \code{fit}. In this case, the compiled C++ code for the model is reused.
 #' @return An object of class \code{stanfit}.  See \code{stanfit} and \code{stan} for more details.
-#' @references Faulkner, J. R., and V. N. Minin. 2015. Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. \emph{arXiv} preprint arXiv:1512.06505.
+#' @references Faulkner, J. R., and V. N. Minin. 2017. Locally adaptive smoothing with Markov random fields and shrinkage priors. \emph{Bayesian Analysis} advance publication online.
 #' @seealso \code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, and \code{\link{get_init}}
 #' @export
 
 
-spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fit=NA, data, pars=NA, chains=4, iter=2000, warmup=floor(iter/2), thin=1, ...)  {
+spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fit=NA, data, pars=NA, chains=4, iter=2000, warmup=floor(iter/2), thin=1, control=list(adapt_delta=0.95, max_treedepth=12), ...)  {
 
 		# check for rstan
 		 if (!requireNamespace("rstan", quietly = TRUE)) {
@@ -63,7 +63,8 @@ spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fi
 
 	  if (class(fit)=="stanfit") {
 	  		#warning("Warning: Make sure 'prior','likelihood', and 'order' match those of 'fit' object!")
-	  	  sfit <- stan( model_name=mname, fit=fit, data=data, pars=pars, chains=chains, iter=iter, warmup=warmup, thin=thin, init=finits, ...)
+	  	  sfit <- stan( model_name=mname, fit=fit, data=data, pars=pars, chains=chains, iter=iter, warmup=warmup, 
+	  	                thin=thin, init=finits, control=control, ...)
 	  }
 
 	  if (class(fit)!="stanfit"){
@@ -71,7 +72,7 @@ spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fi
 	     if (class(fit)=="logical") {
 	     	   if (!is.na(fit)) stop("Must specify fit as 'stanfit' object or as NA.")
 	     		 if (is.na(fit)) {
-	     		 	    sfit <- stan(model_name=mname, model_code = mcode, fit=fit, data=data, chains=chains, iter=iter, warmup=warmup, thin=thin, init=finits, ...)
+	     		 	    sfit <- stan(model_name=mname, model_code = mcode, fit=fit, data=data, chains=chains, iter=iter, warmup=warmup, thin=thin, init=finits, control=control, ...)
 	     		 }
 	     	}
 	  }

@@ -102,7 +102,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
-		theta[1] <- 2*sdy*ztheta1 + muy;
+		theta[1] = 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 	  	   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
 	 	   theta[j+1] = zdelta[j]*tau[j] + theta[j];

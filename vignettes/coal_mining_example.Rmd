@@ -28,7 +28,7 @@ coal_dat <- list(J = nrow(coal), y = coal$events)
 
 ## Run Models
 
-In the paper we compare three different configurations for the prior distributions on the order-*k* differences in latent function values (normal, Laplace, and horseshoe).  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `spmrf` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  Note that the normal model takes about 5 seconds to run per chain, the Laplace model about 20-30 seconds per chain, and the horseshoe about 40-50 seconds per chain.  Of course results will differ depending on your computer set up. 
+In the paper we compare three different configurations for the prior distributions on the order-*k* differences in latent function values (normal, Laplace, and horseshoe).  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `spmrf` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  Note that the normal model takes about 5 seconds to run per chain, the Laplace model about 20-30 seconds per chain, and the horseshoe about 40-60 seconds per chain.  Of course results will differ depending on your computer set up. Also note that the difficult posterior terrain induced by the horshoe model requires adjustment of some of the tuning parameters for the NUTS algorithm in `stan` to allow better adaptation during warmup and subsequently better performance during sampling. Divergent transitions after warmup may still occur, but a small number of them is not a problem if other posterior diagnostics look acceptable.
 
 
 ```{r eval=FALSE}
@@ -41,7 +41,7 @@ pars.H <- c("theta", "tau", "gam")
 nchain <- 4
 ntotsamp <- 2500
 nthin <- 5
-nburn <- 500
+nburn <- 1500
 niter <- (ntotsamp/nchain)*nthin + nburn
 
 # Run models
@@ -50,7 +50,7 @@ cfit.N <- spmrf(prior="normal", likelihood="poisson", order=1, data=coal_dat, pa
 cfit.L <- spmrf(prior="laplace", likelihood="poisson", order=1, data=coal_dat, par=pars.L, 
 					chains=nchain, warmup=nburn, thin=nthin, iter=niter)
 cfit.H <- spmrf(prior="horseshoe", likelihood="poisson", order=1, data=coal_dat, par=pars.H, 
-					chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=12))
 
 # Extract posterior draws
 cout.N <- as.array(cfit.N)
@@ -71,9 +71,9 @@ Next we check some posterior diagnostics of the parameters.  The `print.stanfit`
 ```{r eval=FALSE}
 
 # Print parameter summaries
-print(cfit.N)
-print(cfit.L)
-print(cfit.H)
+print(cfit.N, pars=pars.N)
+print(cfit.L, pars=pars.L)
+print(cfit.H, pars=pars.H)
 
 # Some example trace plots for the horseshoe model
 plot_trace(cout.H, "theta[10]", pscale="original", stack=TRUE, colset="black")

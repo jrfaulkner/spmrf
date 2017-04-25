@@ -67,7 +67,7 @@ legend('topright', legend="Truth", lty=1, lwd=2, col="red", bty="n")
 
 Now we are ready to fit some models using the `spmrf` function.  It is important to know that this function is a wrapper for the `stan` function in the `rstan` package.  The `spmrf` function has a few arguments for describing the model you want to run, but it also accepts most of the arguments of the `stan` function (see `spmrf` documentation for details).  Given the overlap between the `spmrf` and `stan` functions, it would be beneficial to familiarize yourself with the `stan` function and its inputs.  
 
-Some of the model parameters may not be of interest in posterior summaries, including those that the model code generates due to parameter transformations.  We can tell the `spmrf` function to give us output only for the parameters of interest.  We set up the following character vectors to specify the parameters of interest for later summaries.  We are really only interested in the theta (latent trend) parameters, but have included others for posterior diagnostic checks (see Faulkner and Minin (2015) for description of models and associated parameters).
+Some of the model parameters may not be of interest in posterior summaries, including those that the model code generates due to parameter transformations.  We can tell the `spmrf` function to give us output only for the parameters of interest.  We set up the following character vectors to specify the parameters of interest for later summaries.  We are really only interested in the theta (latent trend) parameters, but have included others for posterior diagnostic checks (see Faulkner and Minin (2017) for description of models and associated parameters).
 
 
 ```{r eval=FALSE}
@@ -98,25 +98,28 @@ ipcfit.H <- spmrf( prior="horseshoe", likelihood="normal", order=1, zeta=0.01,
 		
 ```
 
-Next we pass these compiled objects to `spmrf` for the actual MCMC runs by specifying the compiled fit objects with the `fit` argument.  Before that we need to set up the MCMC run parameters common to each run.  We run 4 chains for each model with each chain having a burn-in (warm-up) period of 500 draws and a thinning level of every 5 samples.  The total number of posterior samples we want to keep here will be 2000, which means each chain requires 3000 total iterations including burn-in and before thinning.  Depending on the configuration of your computer, the model with normal prior may take about 10-20 seconds per chain to run, while the other two models may take 60-120 seconds per chain, with the horsehoe model taking the longest. 
+Next we pass these compiled objects to `spmrf` for the actual MCMC runs by specifying the compiled fit objects with the `fit` argument.  Before that we need to set up the MCMC run parameters common to each run.  We run 4 chains for each model with each chain having a burn-in (warm-up) period of 500 draws and a thinning level of every 5 samples.  The total number of posterior samples we want to keep here will be 2000, which means each chain requires 3000 total iterations including burn-in and before thinning.  Depending on the configuration of your computer, the model with normal prior may take about 10-20 seconds per chain to run, while the other two models may take 60-120 seconds per chain, with the horsehoe model taking the longest. Note that we make some adjustments to some of the tuning parameters for the NUTS algorithm in `stan` to allow better adaptation during warmup and subsequently better performance during sampling. Divergent transitions after warmup may still occur, but a small number of them is not a problem if other posterior diagnostics look acceptable.  You can increase the `adapt_delta` parameter to decrease the step size and potentially reduce the number of divergent transitions.
 
 ```{r eval=FALSE}
 # MCMC run settings
 nchain <- 4
 ntotsamp <- 2000
 nthin <- 5
-nburn <- 500
+nburn <- 1000
 niter <- (ntotsamp/nchain)*nthin + nburn
 
 # Model with normal prior 
 pcfit.N <- spmrf(prior="normal", likelihood="normal", order=1, fit=ipcfit.N, data=pcdat.norm, 
-							par=pars.N,	chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+							par=pars.N,	chains=nchain, warmup=nburn, thin=nthin, iter=niter, 
+							control=list(adapt_delta=0.96, max_treedepth=12))
 # Model with Laplace prior
 pcfit.L <- spmrf(prior="laplace", likelihood="normal",  order=1,  fit=ipcfit.L, data=pcdat.norm, 
-							par=pars.L,	chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+							par=pars.L,	chains=nchain, warmup=nburn, thin=nthin, iter=niter,
+							control=list(adapt_delta=0.96, max_treedepth=12))
 # Model with horseshoe prior
 pcfit.H <- spmrf( prior="horseshoe", likelihood="normal", order=1,  fit=ipcfit.H, data=pcdat.norm, 
-							par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+							par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter,
+							control=list(adapt_delta=0.995, max_treedepth=12))
 
 ```
 
@@ -223,13 +226,16 @@ Next we fit the models without compiling separately and we keep the same paramet
 # Compile and run spmrf models for varying smooth (vs) funtion
 # -- GMRF
 vsfit.N <- spmrf(prior="normal", likelihood="normal", order=2, data=vsdat.norm, 
-								par=pars.N,	chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+								par=pars.N,	chains=nchain, warmup=nburn, thin=nthin, iter=niter, 
+							  control=list(adapt_delta=0.96, max_treedepth=12))
 # -- Laplace
 vsfit.L <- spmrf(prior="laplace", likelihood="normal",  order=2, data=vsdat.norm, 
-								par=pars.L,	chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+								par=pars.L,	chains=nchain, warmup=nburn, thin=nthin, iter=niter, , 
+							  control=list(adapt_delta=0.96, max_treedepth=12))
 # -- Horseshoe
 vsfit.H <- spmrf(prior="horseshoe", likelihood="normal", order=2, data=vsdat.norm, 
-								par=pars.H,	chains=nchain, warmup=nburn, thin=nthin, iter=niter)
+								par=pars.H,	chains=nchain, warmup=nburn, thin=nthin, iter=niter, , 
+							  control=list(adapt_delta=0.995, max_treedepth=12))
 
 # extract posteriors
 vsout.N <- as.array(vsfit.N)
@@ -252,9 +258,9 @@ The following code produces summaries for all models and a few trace plots for t
 ```{r eval=FALSE}
 
 # print parameter summaries
-print(vsout.N)
-print(vsout.L)
-print(vsout.H)
+print(vsout.N, pars=pars.N)
+print(vsout.L, pars=pars.L)
+print(vsout.H, pars=pars.H)
 
 # example trace plots for horseshoe model
 plot_trace(vsout.H, "theta[20]", pscale="original", stack=TRUE, colset="color")
@@ -310,7 +316,7 @@ Some of these models can be quite time consuming to fit.  If you have access to 
 nchain <- 4
 ntotsamp <- 2000
 nthin <- 5
-nburn <- 500
+nburn <- 1000
 niter <- (ntotsamp/nchain)*nthin + nburn
 chnlist <- 1:4
 
@@ -321,7 +327,8 @@ ivsfit.H <- spmrf(prior="horseshoe", likelihood="normal", order=2, data=vsdat.no
 # Run model separately per chain -- one per core
 tmp.sflist.H <- mclapply(1:nchain, mc.cores = nchain, function(xx) spmrf(prior="horseshoe",
 							likelihood="normal", order=2, fit=ivsfit.H, data=vsdat.norm, par=pars.H, 
-							chains=1, warmup=nburn,	thin=nthin, iter=niter, chain_id=chnlist[xx], refresh=-1) )
+							chains=1, warmup=nburn,	thin=nthin, iter=niter, chain_id=chnlist[xx], refresh=-1,
+							control=list(adapt_delta=0.99, max_treedepth=12)) )
 
 # Convert list to stanfit object
 vsfit.H <- sflist2stanfit(tmp.sflist.H)

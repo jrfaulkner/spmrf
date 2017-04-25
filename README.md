@@ -5,7 +5,7 @@ This repository houses the `R` package `spmrf`, which is used for fitting Bayesi
 ## Installation
 1. Install package dependency `rstan` and install package `devtools` using `install.packages` function.  Note that if you do not already have `rstan` installed, you may need to install additional packages such as `Rtools` if using a Windows platform, or `Xcode` if you are using a Mac.  See the [`rstan` prerequisites](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started#prerequisites) for more information.  If you want the vignettes, you may also need to install the `rmarkdown` package
 2. Load `devtools` using `library(devtools)`.
-3. Install `bnps` from GitHub using either
+3. Install `spmrf` from GitHub using either
   1. `install_github("jrfaulkner/spmrf")` or
   2. `install_github("jrfaulkner/spmrf", build_vignettes=TRUE)` if you want the vignette documentation which provides examples of using `spmrf`.  Note that building vignettes will make the load take a little longer.
 
