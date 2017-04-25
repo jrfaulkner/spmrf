@@ -115,7 +115,7 @@ dev.off()
 
 ## References
 
-Faulkner, J.R., and V.N. Minin.  2015.  Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. arXiv preprint arXiv:1512.06505.
+Faulkner, J.R., and V.N. Minin.  2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413), Bayesian Analysis, advance publication.
 
 
 

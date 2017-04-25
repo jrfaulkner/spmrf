@@ -1,5 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
-bnps.Rproj
+spmrf.Rproj
 inst/doc
+.DS_Store
+vignettes/.DS_Store

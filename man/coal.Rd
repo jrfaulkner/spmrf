@@ -23,7 +23,7 @@ Raftery, A.E and Akman, V.E. 1986. Bayesian analysis of a Poisson process with a
 \examples{ \dontrun{
 data(coal)
 
-## convert to list for passage to bsmfit
+## convert to list for passage to spmrf
 coal_dat <- list(J=nrow(coal), y=coal$events)
 
 ## plot the series with lines

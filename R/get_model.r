@@ -55,11 +55,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		theta[1] <- 2*sdy*ztheta1 + muy;
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		theta[1] = 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
-		   tau[j] <- gam*tan(ztau[j]*pi()/2);
-	 	   theta[j+1] <- zdelta[j]*tau[j] + theta[j];
+		   tau[j] = gam*tan(ztau[j]*pi()/2);
+	 	   theta[j+1] = zdelta[j]*tau[j] + theta[j];
 		}
 	  }
 	  model {
@@ -101,11 +101,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
+		gam = ZETAVAL*tan(zgam*pi()/2);
 		theta[1] <- 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
-	  	   tau[j] <- gam*sqrt(-2*log(1-ztau2[j]));
-	 	   theta[j+1] <- zdelta[j]*tau[j] + theta[j];
+	  	   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
+	 	   theta[j+1] = zdelta[j]*tau[j] + theta[j];
 		}
 	  }
 	  model {
@@ -147,10 +147,10 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		theta[1] <- 2*sdy*ztheta1 + muy;
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		theta[1] = 2*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
-	 	   theta[j+1] <- gam*zdelta[j] + theta[j];
+	 	   theta[j+1] = gam*zdelta[j] + theta[j];
 		}
 	  }
 	  model {
@@ -196,13 +196,13 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*(1/sqrt(3.0))*tan(zptau2*pi()/2);
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*(1/sqrt(3.0))*tan(zptau2*pi()/2);
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
-	   	   tau[j] <- gam*tan(ztau[j]*pi()/2);
-	 	   theta[j+2] <- zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
+	   	   tau[j] = gam*tan(ztau[j]*pi()/2);
+	 	   theta[j+2] = zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
 		}
 	  }
 	  model {
@@ -248,13 +248,13 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*sqrt(-(2.0/3.0)*log(1-zptau2));
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*sqrt(-(2.0/3.0)*log(1-zptau2));
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
-		   tau[j] <- gam*sqrt(-2*log(1-ztau2[j]));
-	 	   theta[j+2] <- zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
+		   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
+	 	   theta[j+2] = zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
 		}
 	  }
 	  model {
@@ -296,12 +296,12 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*sqrt(1.0/3.0);
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*sqrt(1.0/3.0);
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
-	 	   theta[j+2] <- gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
+	 	   theta[j+2] = gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
 		}
 	  }
 	  model {
@@ -349,15 +349,15 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*sqrt(1.0/10.0)*tan(zptau2*pi()/2);
-		ptau3 <- gam*sqrt(3.0/10.0)*tan(zptau3*pi()/2);
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
-		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*sqrt(1.0/10.0)*tan(zptau2*pi()/2);
+		ptau3 = gam*sqrt(3.0/10.0)*tan(zptau3*pi()/2);
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
+		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
-	   	   tau[j] <- gam*tan(ztau[j]*pi()/2);
-	 	   theta[j+3] <- zdelta[j+2]*tau[j] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
+	   	   tau[j] = gam*tan(ztau[j]*pi()/2);
+	 	   theta[j+3] = zdelta[j+2]*tau[j] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
 		}
 	  }
 	  model {
@@ -405,15 +405,15 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*sqrt(-(1.0/5.0)*log(1-zptau2));
-		ptau3 <- gam*sqrt(-(3.0/5.0)*log(1-zptau3));
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
-		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*sqrt(-(1.0/5.0)*log(1-zptau2));
+		ptau3 = gam*sqrt(-(3.0/5.0)*log(1-zptau3));
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
+		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
-		   tau[j] <- gam*sqrt(-2*log(1-ztau2[j]));
-	 	   theta[j+3] <- zdelta[j+2]*tau[j] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
+		   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
+	 	   theta[j+3] = zdelta[j+2]*tau[j] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
 	    }
 	  }
 	  model {
@@ -459,14 +459,14 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGTPARM
 
 		//SIGSET
-		gam <- ZETAVAL*tan(zgam*pi()/2);
-		ptau2 <- gam*sqrt(1.0/10.0);
-		ptau3 <- gam*sqrt(3.0/10.0);
-		theta[1] <- 2*sdy*ztheta1 + muy;
-		theta[2] <- ptau2*zdelta[1] + theta[1];
-		theta[3] <- ptau3*zdelta[2] + 2*theta[2] - theta[1];
+		gam = ZETAVAL*tan(zgam*pi()/2);
+		ptau2 = gam*sqrt(1.0/10.0);
+		ptau3 = gam*sqrt(3.0/10.0);
+		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[2] = ptau2*zdelta[1] + theta[1];
+		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
-	 	   theta[j+3] <- gam*zdelta[j+2] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
+	 	   theta[j+3] = gam*zdelta[j+2] + 3*theta[j+2] - 3*theta[j+1] + theta[j];
 	    }
 	  }
 	  model {
@@ -499,20 +499,20 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		tmp.b <- sub("YSTATE", "real y[J];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", "", x=tmp.b)
 		tmp.b <- sub("//NSTATE", "", x=tmp.b)
-		tmp.b <- sub("MUYSTATE", "muy <- mean(y);", x=tmp.b)
-		tmp.b <- sub("SDYSTATE", "sdy <- sd(y);", x=tmp.b)
+		tmp.b <- sub("MUYSTATE", "muy = mean(y);", x=tmp.b)
+		tmp.b <- sub("SDYSTATE", "sdy = sd(y);", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "real <lower=0, upper=1> zsigma;", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "real <lower=0> sigma;", x=tmp.b)
-		tmp.b <- sub("//SIGSET", "sigma <- 5.0*tan(zsigma*pi()/2);", x=tmp.b)
+		tmp.b <- sub("//SIGSET", "sigma = 5.0*tan(zsigma*pi()/2);", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "zsigma ~ uniform(0,1); ", x=tmp.b)
 		tmp.b <- sub("LIKESTATE" , "y ~ normal(theta, sigma); ", x=tmp.b)
 	}
 	if (likelihood=="poisson"){
 		tmp.b <- sub("YSTATE", "int <lower=0> y[J];", x=tmp.a)
-		tmp.b <- sub("//LGYSTATE", "real logy[J];\n real ry[J]; \n for (j in 1:J) {\n logy[j] <- log(y[j]+0.5);\n ry[j] <- 1.0*y[j]; \n}\n", x=tmp.b)
+		tmp.b <- sub("//LGYSTATE", "real logy[J];\n real ry[J]; \n for (j in 1:J) {\n logy[j] = log(y[j]+0.5);\n ry[j] = 1.0*y[j]; \n}\n", x=tmp.b)
 		tmp.b <- sub("//NSTATE", "", x=tmp.b)
-		tmp.b <- sub("MUYSTATE", "muy <- log(mean(ry));", x=tmp.b)
-		tmp.b <- sub("SDYSTATE", "sdy <- sd(logy);", x=tmp.b)
+		tmp.b <- sub("MUYSTATE", "muy = log(mean(ry));", x=tmp.b)
+		tmp.b <- sub("SDYSTATE", "sdy = sd(logy);", x=tmp.b)
 		tmp.b <- sub("LIKESTATE" , "y ~ poisson_log(theta);", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
@@ -524,19 +524,19 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	real logp[J];
 
 	for (j in 1:J){
-		pp[j] <- (y[j]+0.0)/(N[j]+0.0);
+		pp[j] = (y[j]+0.0)/(N[j]+0.0);
 		if (pp[j]==0.0)
-			pp[j] <- 0.005;
+			pp[j] = 0.005;
 		if (pp[j]==1.0)
-			pp[j] <- 0.995;
-		logp[j] <- logit(pp[j]);
+			pp[j] = 0.995;
+		logp[j] = logit(pp[j]);
 	}'
 	if (likelihood=="binomial"){
 		tmp.b <- sub("YSTATE", "int <lower=0> y[J];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", bintrans, x=tmp.b)
 		tmp.b <- sub("//NSTATE", "int <lower=1> N[J];", x=tmp.b)
-		tmp.b <- sub("MUYSTATE", "muy <- logit(mean(pp));", x=tmp.b)
-		tmp.b <- sub("SDYSTATE", "sdy <- sd(logp);", x=tmp.b)
+		tmp.b <- sub("MUYSTATE", "muy = logit(mean(pp));", x=tmp.b)
+		tmp.b <- sub("SDYSTATE", "sdy = sd(logp);", x=tmp.b)
 		tmp.b <- sub("LIKESTATE" , "y ~ binomial_logit(N, theta);", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
