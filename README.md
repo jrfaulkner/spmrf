@@ -16,4 +16,4 @@ The following vignettes provide some examples using the `spmrf` package with ste
 2. [coal_mine_example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/coal_mining_example.Rmd)
 
 ## References
-Faulkner, J. R., and V. N. Minin. 2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413), Bayesian Analysis, advance publication.
+Faulkner, J. R., and V. N. Minin. 2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413){:target="_blank"}, Bayesian Analysis, advance publication.
