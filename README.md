@@ -12,9 +12,9 @@ This repository houses the `R` package `spmrf`, which is used for fitting Bayesi
 ## Vignettes
 The following vignettes provide some examples using the `spmrf` package with step-by-step instructions and R code. 
 
-1. [Introduction_to_spmrf](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/introduction_to_spmrf.Rmd)
-2. [coal_mine_example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/coal_mining_example.Rmd)
-3. [unequal_grid_example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/unequal_grid_and_covariate_example.Rmd)
+1. [Introduction to spmrf](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/introduction_to_spmrf.Rmd)
+2. [Coal Mining Example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/coal_mining_example.Rmd)
+3. [Unequal Grid and Covariates Example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/unequal_grid_and_covariate_example.Rmd)
 
 ## References
 Faulkner, J. R., and V. N. Minin. 2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413), Bayesian Analysis, advance publication.
