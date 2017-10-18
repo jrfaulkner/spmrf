@@ -10,7 +10,7 @@ vignette: >
 
 
 
-The following document provides `R` code for fitting Bayesian trend filter models using the `spmrf` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2015). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
+The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2017). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
 
 
 ## Data
@@ -96,11 +96,11 @@ Now we use the `plot_trend` function from the `spmrf` package to plot the poster
 yrng <- c(0,5.5)
 png(filename='coal_plots.png', width=1500, height=400, res=200)
   par(mfrow=c(1,3), mar=c(2,1.5,1.5,1), oma=c(2,2,0,0))
-  plot_trend(theta=th.N, obstype="poisson", obsvec=coal$events, timelab=coal$year, main="Normal", 
+  plot_trend(theta=th.N, obstype="poisson", obsvar=coal$events, xvar=coal$year, main="Normal", 
 		xlab="", ylab="", ylim=yrng)
-  plot_trend(theta=th.L, obstype="poisson", obsvec=coal$events, timelab=coal$year,, main="Laplace", 
+  plot_trend(theta=th.L, obstype="poisson", obsvar=coal$events, xvar=coal$year, main="Laplace", 
 		xlab="", ylab="", ylim=yrng)
-  plot_trend(theta=th.H, obstype="poisson", obsvec=coal$events, timelab=coal$year, main="Horseshoe", 
+  plot_trend(theta=th.H, obstype="poisson", obsvar=coal$events, xvar=coal$year, main="Horseshoe", 
 		xlab="", ylab="", ylim=yrng)
  legend(x="topright", legend=c("Median", "95% BCI"), col=c("blue","lightblue"), lwd=3, bty="n", cex=1)
  mtext(side=1, outer=T, line=1, text="Year", font=2, cex=0.8)

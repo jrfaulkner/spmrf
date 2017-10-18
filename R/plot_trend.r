@@ -5,15 +5,16 @@
 #' @param mfit An object containing posterior draws from a \code{spmrf} or \code{stan} model fit.  The object can be of class \code{stanfit}, \code{array}, \code{matrix}, or \code{data.frame}.  Do not specify \code{theta} if \code{mfit} is specified.
 #' @param obstype Name of probability distribution of observations.  This controls the back-transformation of the process parameters.  Possible obstypes are 'normal', 'poisson', or 'binomial'. Assumed link functions are the log for 'poisson' and logit for 'binomial'.
 #' @param alpha Controls level for 100*(1-\code{alpha})\% Bayesian credible intervals.
-#' @param obsvec Vector of observations. Assumed to be ordered by time with one observation per time point. If \code{obsvec} is NULL, then data are not plotted.
-#' @param timelab Label for time variable.  Can be a numeric or character vector.  Must be the same length as observation vector (\code{y}).  If not specified, then a sequence from 1 to the total number of observations with unit time step is used.
+#' @param obsvar Vector of observations. Assumed to be ordered by time with one observation per time point. If \code{obsvar} is NULL, then data are not plotted. Note if plotting observations you must also specify a matching \code{xvar} of the same length.
+#' @param uxvar vector of unique values of the grid locations of the trend parameters. This can be a numeric or integer vector. Must be the same length as \code{theta} and must be sorted to match order of locations of \code{theta} elements. If not specified and no \code{xvar} is specified, then a sequence from 1 to the length of \code{theta} with unit spacing will be used.  If \code{xvar} and \code{obsvar} are specified, then \code{uxvar} does not need to be specified.   
+#' @param xvar x-variable for plotting observations \code{obsvar}. Should be a numeric integer vector.  Must be the same length as observation vector (\code{obsvar}). Must be specified if \code{obsvar} is specified.  
 #' @param colset Color set for trend and credible intervals.  These are presets chosen with common color combinations.  Choices are 'blue', 'purple', 'red', 'green', and 'gray'. This parameter is overridden If \code{trend.col} and \code{bci.col} are specified.
 #' @param trend.col Color of the trend line.  Any standard \code{R} plotting colors are allowed. Use this along with \code{bci.col} if color choices other than the presets provided by colset are desired.
 #' @param bci.col Color of the credible interval band. Any standard \code{R} colors are allowed.
 #' @param pt.col  Color of data points if plotted with \code{obsvec} specified.
 #' @param pt.pch  Type of points to use if data plotted with \code{obsvec} specified (see \code{points} for details.
 #' @param pt.cex  Size of points to use if data plotted with \code{obsvec} specified (see \code{points} for details.
-#' @param xlab Character string describing label for x-axis.  Default is "time" if unspecified.
+#' @param xlab Character string describing label for x-axis.  Default is "x" if unspecified.
 #' @param ylab Character string describing label for y-axis.  Default is "y" if unspecified.
 #' @param main Character string describing label for main title.  Default is "" empty string.
 #' @param xlim Numeric vector with two elements describing limits of x-variable. Default is \code{range} of sequence from 1 to max length of elements in \code{theta} or number of rows in \code{mfit}.
@@ -25,7 +26,7 @@
 #' @export
 #'
 #'
-plot_trend <- function(theta=NULL, mfit=NULL,  obstype="normal", alpha=0.05, obsvec=NULL, timelab=NULL, colset="blue", trend.col=NULL, bci.col=NULL, pt.col="gray60", pt.pch=1, pt.cex=1, ylab, xlab, main, ylim, xlim, ...){
+plot_trend <- function(theta=NULL, mfit=NULL,  obstype="normal", alpha=0.05, obsvar=NULL, uxvar=NULL, xvar=NULL, colset="blue", trend.col=NULL, trend.lwd=3, bci.col=NULL, pt.col="gray60", pt.pch=1, pt.cex=1, ylab, xlab, main, ylim, xlim, ...){
 
 
 	if (is.null(theta) & is.null(mfit)) stop("Must specify either a list with theta summary or a stan model fit object.")
@@ -35,6 +36,8 @@ plot_trend <- function(theta=NULL, mfit=NULL,  obstype="normal", alpha=0.05, obs
 		  if (class(theta)!="list") stop("Argument theta must be a list.")
 		  thp <- theta
 	}
+	
+	if (!is.null(obsvar) & is.null(xvar)) stop("Must specify xvar if using obsvar")
 
 
 	if (is.null(trend.col) & is.null(bci.col)) {
@@ -69,23 +72,24 @@ plot_trend <- function(theta=NULL, mfit=NULL,  obstype="normal", alpha=0.05, obs
 	}
 
 	nn <- length(thp$postmed)
-	tv <- 1:nn
-	if (is.null(timelab)) timelab <- tv
-	if (!is.null(timelab)) tv <- timelab
-	prng <- range(c(thp$bci.lower, thp$bci.upper, obsvec))
+
+	if (is.null(uxvar) & !is.null(xvar)) uxvar <- sort(unique(xvar))
+	if (is.null(uxvar) & is.null(xvar)) uxvar <- 1:nn
+
+	
+	prng <- range(c(thp$bci.lower, thp$bci.upper, obsvar))
   dum <- seq(prng[1], prng[2], length=nn)
 
   if (missing(ylim)) ylim <- prng
-  if (missing(xlim)) xlim <- range(tv)
+  if (missing(xlim)) xlim <- range(uxvar)
   if (missing(ylab)) ylab <- "y"
-  if (missing(xlab)) xlab <- "time"
+  if (missing(xlab)) xlab <- "x"
   if (missing(main)) main <- ""
 
-	plot(tv, dum, type="n", ylim=ylim, xlim=xlim,ylab=ylab,xlab=xlab,main=main, xaxt="n",  ...)
-	  axis(side=1, at=pretty(tv), labels=pretty(timelab) )
-	  polygon(c(tv, rev(tv)), c(thp$bci.lower , rev(thp$bci.upper)), border=NA, col=bcol)
-	  if (!is.null(obsvec)) points(tv, obsvec, pch=pt.pch, col=pt.col,  cex=pt.cex)
-	  lines(tv, thp$postmed, col=tcol, lwd=3)
+	plot(uxvar, dum, type="n", ylim=ylim, xlim=xlim,ylab=ylab,xlab=xlab,main=main,  ...)
+	  polygon(c(uxvar, rev(uxvar)), c(thp$bci.lower , rev(thp$bci.upper)), border=NA, col=bcol)
+	  if (!is.null(obsvar)) points(xvar, obsvar, pch=pt.pch, col=pt.col,  cex=pt.cex)
+	  lines(uxvar, thp$postmed, col=tcol, lwd=trend.lwd)
 
 }
 

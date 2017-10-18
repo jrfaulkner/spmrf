@@ -1,6 +1,6 @@
 #' Fit Bayesian nonparametric adaptive smoothing model
 #'
-#' Fit Bayesian nonparametric adaptive temporal smoothing models using Hamiltonian Monte Carlo with the \code{stan} engine from the \pkg{rstan} package.
+#' Fit Bayesian nonparametric adaptive temporal smoothing models with the shrinkage-prior Markov random fields (SPMRF) method via Hamiltonian Monte Carlo with the \code{stan} engine from the \pkg{rstan} package.
 #' @param prior A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".
 #' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3).
@@ -19,6 +19,9 @@
 #' \code{stan} does all of the work of fitting a Stan model and returning the results as an instance of \code{stanfit}. First, it translates the Stan model to C++ code. Second, the C++ code is compiled into a binary shared object, which is loaded into the current \code{R} session (an object of S4 class \code{stanmodel} is created). Finally, samples are drawn and wrapped in an object of S4 class \code{stanfit}, which provides functions such as \code{print}, \code{summary}, and \code{plot} to inspect and retrieve the results of the fitted model.
 #'
 #' \code{spmrf} can also be used to sample again from a fitted model under different settings (e.g., different \code{iter}) by providing argument \code{fit}. In this case, the compiled C++ code for the model is reused.
+#' 
+#' The list specified by the \code{data} argument must contain an element named \code{y}, which is the vector of the response or observation variable. If the observation variable is binary or binomial, a vector of counts representing the number of 'trials' per observation must also be present and named \code{Nsize} and of the same length as \code{y}. If the observations are on an equally spaced grid with a single observation per grid location, then the \code{xvar1} element can be left unspecified. However, if there are more than one observation per grid location, or if the grid locations are unequally spaced, or if the response is being modeled as a function of a continuous covariate, then an a vector of grid locations or covariate values for each observation must be specified with element name \code{xvar1} and must be of the same length as \code{y}.  
+#'   
 #' @return An object of class \code{stanfit}.  See \code{stanfit} and \code{stan} for more details.
 #' @references Faulkner, J. R., and V. N. Minin. 2017. Locally adaptive smoothing with Markov random fields and shrinkage priors. \emph{Bayesian Analysis} advance publication online.
 #' @seealso \code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, and \code{\link{get_init}}
@@ -38,6 +41,45 @@ spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fi
 	  if (is.null(data) | class(data)!="list") stop("Must specify input data set as a list.")
 
 		stlist <- list(...)
+		
+		## Check if y is missing
+		if (is.null(data$y)) stop("Data list must contain observation variable named y")
+		
+		## Check if N is missing
+		if (is.null(data$N)){
+			if (!is.null(data$J)) {
+				data$N <- length(data$y)
+				data <- data[names(data)!="J"]  #get rid of J input
+			} else if (is.null(data$J)) {
+				data$N <- length(data$y)
+			}
+		}
+		if (length(data$y)!=data$N) stop("number of observations N must equal length of y")
+		## Check if a xvar1 is specified
+		## if missing, assume equal spaced grid of length N
+		if (is.null(data$xvar1)) {
+			data$xvar1 <- 1:data$N
+		}
+		## Find unique values of xvar1
+		uxv1 <- unique(data$xvar1)
+		## Get ranks of locations
+		ruxv1 <- rank(uxv1)
+		## order by ranks
+		m.xv <- cbind(1:length(uxv1), uxv1, ruxv1)
+		m.xv <- m.xv[order(m.xv[,2]),]
+		## get grid cell widths for ordered cells
+		duxv1 <- diff(m.xv[,2])
+		suxv1 <- sort(uxv1)
+		## create mapping of obs to xvar ranks
+		rnk.xv <- integer(data$N)
+		for (ii in 1:data$N){
+			rnk.xv[ii] <- ruxv1[which(uxv1==data$xvar1[ii])]
+		}
+    ## add ranks and cell widths to data 
+		data$J <- length(uxv1)  #this is number of grid cells
+		data$duxvar1 <- duxv1  #length
+		data$xrank1 <- rnk.xv
+		
 		tmp.dat <<- data
 	  mcode <- get_model(prior=prior, likelihood=likelihood, order=order, zeta=zeta)
 	  finits <- get_init(prior=prior, likelihood=likelihood, order=order)

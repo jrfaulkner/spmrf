@@ -30,9 +30,13 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	H_1_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
-		YSTATE  // response for obs j
-		//NSTATE
+      int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+      vector [N] xvar1;  //locations for observations
+      vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
+      YSTATE  // response for obs i
+      //NSTATE
 	  }
 	  transformed data {
 		real muy;
@@ -56,10 +60,10 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 		   tau[j] = gam*tan(ztau[j]*pi()/2);
-	 	   theta[j+1] = zdelta[j]*tau[j] + theta[j];
+	 	   theta[j+1] = zdelta[j]*tau[j]*sqrt(duxvar1[j]) + theta[j];
 		}
 	  }
 	  model {
@@ -76,7 +80,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	###  LAPLACE PRIOR
 	L_1_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
@@ -102,10 +110,10 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
 	  	   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
-	 	   theta[j+1] = zdelta[j]*tau[j] + theta[j];
+	 	   theta[j+1] = zdelta[j]*tau[j]*sqrt(duxvar1[j]) + theta[j];
 		}
 	  }
 	  model {
@@ -124,7 +132,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	N_1_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
@@ -148,9 +160,9 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		for (j in 1:(J-1)){
-	 	   theta[j+1] = gam*zdelta[j] + theta[j];
+	 	   theta[j+1] = gam*zdelta[j]*sqrt(duxvar1[j]) + theta[j];
 		}
 	  }
 	  model {
@@ -169,17 +181,27 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	H_2_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
 	  transformed data {
+  	vector <lower=0> [J-2] drat;
+	  vector <lower=0> [J-2] sdrat;
 		real muy;
 		real sdy;
 		//LGYSTATE
 		MUYSTATE
 		SDYSTATE
+ 	  for (k in 1:(J-2)){
+	    drat[k] = duxvar1[k+1]/duxvar1[k]; 
+	    sdrat[k] = sqrt(0.5*square(duxvar1[k+1])*(duxvar1[k] + duxvar1[k+1]));
 	  }
+	 }
 	  parameters {
 	    real zdelta[J-1];
 	    real ztheta1;
@@ -198,11 +220,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*(1/sqrt(3.0))*tan(zptau2*pi()/2);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
 	   	   tau[j] = gam*tan(ztau[j]*pi()/2);
-	 	   theta[j+2] = zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
+	 	   theta[j+2] = zdelta[j+1]*tau[j]*sdrat[j] + (1+drat[j])*theta[j+1]-drat[j]*theta[j];
 		}
 	  }
 	  model {
@@ -221,16 +243,26 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	L_2_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
 	  transformed data {
 		real muy;
 		real sdy;
+  	vector <lower=0> [J-2] drat;
+	  vector <lower=0> [J-2] sdrat;
 		//LGYSTATE
 		MUYSTATE
 		SDYSTATE
+ 	  for (k in 1:(J-2)){
+	    drat[k] = duxvar1[k+1]/duxvar1[k]; 
+	    sdrat[k] = sqrt(0.5*square(duxvar1[k+1])*(duxvar1[k] + duxvar1[k+1]));
+	  }
 	  }
 	  parameters {
 	    real zdelta[J-1];
@@ -250,11 +282,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*sqrt(-(2.0/3.0)*log(1-zptau2));
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
 		   tau[j] = gam*sqrt(-2*log(1-ztau2[j]));
-	 	   theta[j+2] = zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
+	 	   theta[j+2] = zdelta[j+1]*tau[j]*sdrat[j] + (1+drat[j])*theta[j+1]-drat[j]*theta[j];
 		}
 	  }
 	  model {
@@ -272,14 +304,24 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	###   NORMAL
 	N_2_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
 	  transformed data {
+  	vector <lower=0> [J-2] drat;
+	  vector <lower=0> [J-2] sdrat;
 		real muy;
 		real sdy;
 		//LGYSTATE
+ 	  for (k in 1:(J-2)){
+	    drat[k] = duxvar1[k+1]/duxvar1[k]; 
+	    sdrat[k] = sqrt(0.5*square(duxvar1[k+1])*(duxvar1[k] + duxvar1[k+1]));
+ 	  }
 		MUYSTATE
 		SDYSTATE
 	  }
@@ -298,10 +340,10 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		//SIGSET
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*sqrt(1.0/3.0);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		for (j in 1:(J-2)){
-	 	   theta[j+2] = gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
+ 	   theta[j+2] = gam*sdrat[j]*zdelta[j+1] + (1+drat[j])*theta[j+1] - drat[j]*theta[j]; 
 		}
 	  }
 	  model {
@@ -320,7 +362,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	###  HORSESHOE
 	H_3_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
@@ -352,7 +398,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*sqrt(1.0/10.0)*tan(zptau2*pi()/2);
 		ptau3 = gam*sqrt(3.0/10.0)*tan(zptau3*pi()/2);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -376,7 +422,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	###  LAPLACE
 	L_3_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
@@ -408,7 +458,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*sqrt(-(1.0/5.0)*log(1-zptau2));
 		ptau3 = gam*sqrt(-(3.0/5.0)*log(1-zptau3));
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -434,7 +484,11 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	###   NORMAL
 	N_3_temp <- '
 	  data {
-	    int<lower=0> J; // number of observations
+	    int<lower=0> N; // number of observations
+	    int<lower=0> J; // number of grid cells
+			vector [N] xvar1;  //locations for observations
+	    vector [J-1] duxvar1;  //distances between unique locations
+      int<lower=0> xrank1[N]; //rank order of location for each obs
 		YSTATE  // response for obs j
 		//NSTATE
 	  }
@@ -462,7 +516,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		gam = ZETAVAL*tan(zgam*pi()/2);
 		ptau2 = gam*sqrt(1.0/10.0);
 		ptau3 = gam*sqrt(3.0/10.0);
-		theta[1] = 2*sdy*ztheta1 + muy;
+		theta[1] = 5*sdy*ztheta1 + muy;
 		theta[2] = ptau2*zdelta[1] + theta[1];
 		theta[3] = ptau3*zdelta[2] + 2*theta[2] - theta[1];
 		for (j in 1:(J-3)){
@@ -496,7 +550,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	# replace likelihood-related statements
 	if (likelihood=="normal"){
-		tmp.b <- sub("YSTATE", "real y[J];", x=tmp.a)
+		tmp.b <- sub("YSTATE", "real y[N];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", "", x=tmp.b)
 		tmp.b <- sub("//NSTATE", "", x=tmp.b)
 		tmp.b <- sub("MUYSTATE", "muy = mean(y);", x=tmp.b)
@@ -505,39 +559,39 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		tmp.b <- sub("//SIGTPARM", "real <lower=0> sigma;", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "sigma = 5.0*tan(zsigma*pi()/2);", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "zsigma ~ uniform(0,1); ", x=tmp.b)
-		tmp.b <- sub("LIKESTATE" , "y ~ normal(theta, sigma); ", x=tmp.b)
+		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ normal(theta[xrank1[i]], sigma); \n}\n", x=tmp.b)
 	}
 	if (likelihood=="poisson"){
-		tmp.b <- sub("YSTATE", "int <lower=0> y[J];", x=tmp.a)
-		tmp.b <- sub("//LGYSTATE", "real logy[J];\n real ry[J]; \n for (j in 1:J) {\n logy[j] = log(y[j]+0.5);\n ry[j] = 1.0*y[j]; \n}\n", x=tmp.b)
+		tmp.b <- sub("YSTATE", "int <lower=0> y[N];", x=tmp.a)
+		tmp.b <- sub("//LGYSTATE", "real logy[N];\n real ry[N]; \n for (j in 1:N) {\n logy[j] = log(y[j]+0.5);\n ry[j] = 1.0*y[j]; \n}\n", x=tmp.b)
 		tmp.b <- sub("//NSTATE", "", x=tmp.b)
 		tmp.b <- sub("MUYSTATE", "muy = log(mean(ry));", x=tmp.b)
 		tmp.b <- sub("SDYSTATE", "sdy = sd(logy);", x=tmp.b)
-		tmp.b <- sub("LIKESTATE" , "y ~ poisson_log(theta);", x=tmp.b)
+		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ poisson_log(theta[xrank1[i]]);\n}\n", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "", x=tmp.b)
 
 	}
-	bintrans <- 'real <lower=0,upper=1> pp[J];
-	real logp[J];
+	bintrans <- 'real <lower=0,upper=1> pp[N];
+	real logp[N];
 
-	for (j in 1:J){
-		pp[j] = (y[j]+0.0)/(N[j]+0.0);
-		if (pp[j]==0.0)
-			pp[j] = 0.005;
-		if (pp[j]==1.0)
-			pp[j] = 0.995;
-		logp[j] = logit(pp[j]);
-	}'
+	for (i in 1:N){
+		pp[j] = (y[i]+0.0)/(Nsize[i]+0.0);
+		if (pp[i]==0.0)
+			pp[i] = 0.005;
+		if (pp[i]==1.0)
+			pp[i] = 0.995;
+		logp[i] = logit(pp[i]);
+	}\n'
 	if (likelihood=="binomial"){
-		tmp.b <- sub("YSTATE", "int <lower=0> y[J];", x=tmp.a)
+		tmp.b <- sub("YSTATE", "int <lower=0> y[N];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", bintrans, x=tmp.b)
-		tmp.b <- sub("//NSTATE", "int <lower=1> N[J];", x=tmp.b)
+		tmp.b <- sub("//NSTATE", "int <lower=1> Nsize[N];", x=tmp.b)
 		tmp.b <- sub("MUYSTATE", "muy = logit(mean(pp));", x=tmp.b)
 		tmp.b <- sub("SDYSTATE", "sdy = sd(logp);", x=tmp.b)
-		tmp.b <- sub("LIKESTATE" , "y ~ binomial_logit(N, theta);", x=tmp.b)
+		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ binomial_logit(Nsize[i], theta[xrank1[i]]);\n}\n", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)

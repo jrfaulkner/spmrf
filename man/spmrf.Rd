@@ -4,9 +4,10 @@
 \alias{spmrf}
 \title{Fit Bayesian nonparametric adaptive smoothing model}
 \usage{
-spmrf(prior = "horseshoe", likelihood = "normal", order = 1, zeta = 0.01,
-  fit = NA, data, pars = NA, chains = 4, iter = 2000,
-  warmup = floor(iter/2), thin = 1, ...)
+spmrf(prior = "horseshoe", likelihood = "normal", order = 1,
+  zeta = 0.01, fit = NA, data, pars = NA, chains = 4, iter = 2000,
+  warmup = floor(iter/2), thin = 1, control = list(adapt_delta = 0.95,
+  max_treedepth = 12), ...)
 }
 \arguments{
 \item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".}
@@ -37,7 +38,7 @@ spmrf(prior = "horseshoe", likelihood = "normal", order = 1, zeta = 0.01,
 An object of class \code{stanfit}.  See \code{stanfit} and \code{stan} for more details.
 }
 \description{
-Fit Bayesian nonparametric adaptive temporal smoothing models using Hamiltonian Monte Carlo with the \code{stan} engine from the \pkg{rstan} package.
+Fit Bayesian nonparametric adaptive temporal smoothing models with the shrinkage-prior Markov random fields (SPMRF) method via Hamiltonian Monte Carlo with the \code{stan} engine from the \pkg{rstan} package.
 }
 \details{
 This function first internally creates \code{stan} model code and a function to generate initial parameter seeds using the information specified in the \code{prior}, \code{likelihood}, \code{order}, and \code{zeta} arguments.  It then passes these to the \code{stan} function.  The \code{spmrf} function will take additional arguments passed to \code{stan} \emph{except for} the arguments \code{file}, \code{model_code}, and \code{init}.  These arguments are not accepted because they may conflict with model forms expected by \code{spmrf}.  See the \code{stan} function documentation for more details.
@@ -45,9 +46,11 @@ This function first internally creates \code{stan} model code and a function to 
 \code{stan} does all of the work of fitting a Stan model and returning the results as an instance of \code{stanfit}. First, it translates the Stan model to C++ code. Second, the C++ code is compiled into a binary shared object, which is loaded into the current \code{R} session (an object of S4 class \code{stanmodel} is created). Finally, samples are drawn and wrapped in an object of S4 class \code{stanfit}, which provides functions such as \code{print}, \code{summary}, and \code{plot} to inspect and retrieve the results of the fitted model.
 
 \code{spmrf} can also be used to sample again from a fitted model under different settings (e.g., different \code{iter}) by providing argument \code{fit}. In this case, the compiled C++ code for the model is reused.
+
+The list specified by the \code{data} argument must contain an element named \code{y}, which is the vector of the response or observation variable. If the observation variable is binary or binomial, a vector of counts representing the number of 'trials' per observation must also be present and named \code{Nsize} and of the same length as \code{y}. If the observations are on an equally spaced grid with a single observation per grid location, then the \code{xvar1} element can be left unspecified. However, if there are more than one observation per grid location, or if the grid locations are unequally spaced, or if the response is being modeled as a function of a continuous covariate, then an a vector of grid locations or covariate values for each observation must be specified with element name \code{xvar1} and must be of the same length as \code{y}.
 }
 \references{
-Faulkner, J. R., and V. N. Minin. 2015. Bayesian trend filtering: adaptive temporal smoothing with shrinkage priors. \emph{arXiv preprint}.
+Faulkner, J. R., and V. N. Minin. 2017. Locally adaptive smoothing with Markov random fields and shrinkage priors. \emph{Bayesian Analysis} advance publication online.
 }
 \seealso{
 \code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, and \code{\link{get_init}}

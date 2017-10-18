@@ -166,13 +166,13 @@ The `plot_trend` function in the `spmrf` package allows you to plot the posterio
 yrng <- c(0,45)
 png(filename='pc_plots.png', width=1500, height=420, res=200)
   par(mfrow=c(1,3), mar=c(2,1.5,1.5,1), oma=c(2,2,0,0))
-  plot_trend(theta=theta.N, obstype="normal", obsvec=pc.norm, pt.cex=0.9, main="Normal", 
+  plot_trend(theta=theta.N, obstype="normal", obsvar=pc.norm, xvar=1:nx, pt.cex=0.9, main="Normal", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mpc, lwd=2, lty=2, col="red")
-  plot_trend(theta=theta.L, obstype="normal", obsvec=pc.norm, pt.cex=0.9, main="Laplace", 
+  plot_trend(theta=theta.L, obstype="normal", obsvar=pc.norm, xvar=1:nx, pt.cex=0.9, main="Laplace", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mpc, lwd=2, lty=2, col="red")
-  plot_trend(theta=theta.H, obstype="normal", obsvec=pc.norm, pt.cex=0.9, main="Horseshoe", 
+  plot_trend(theta=theta.H, obstype="normal", obsvar=pc.norm, xvar=1:nx, pt.cex=0.9, main="Horseshoe", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mpc, lwd=2, lty=2, col="red")
   legend(x="topright", legend=c("Truth", "Median", "95% BCI"), col=c("red", "blue","lightblue"),
@@ -284,15 +284,15 @@ Finally we plot the posterior medians and credible intervals for the theta (late
 yrng <- c(0,45)
 png(filename='vs_plots.png', width=1500, height=420, res=200)
   par(mfrow=c(1,3), mar=c(2,1.5,1.5,1), oma=c(2,2,0,0))
-  plot_trend(theta=thvs.N, obstype="normal", obsvec=vs.norm, pt.cex=0.9, main="Normal", 
+  plot_trend(theta=thvs.N, obstype="normal", obsvar=vs.norm, xvar=1:nx, pt.cex=0.9, main="Normal", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mvs, lwd=2, lty=2, col="red")
   legend(x="topleft", legend=c("Truth", "Median", "95% BCI"), col=c("red", "blue","lightblue"),
 			lty=c(2,1,1), lwd=c(2,2,3), bty="n", cex=0.8)
-  plot_trend(theta=thvs.L, obstype="normal", obsvec=vs.norm, pt.cex=0.9, main="Laplace", 
+  plot_trend(theta=thvs.L, obstype="normal", obsvar=vs.norm, xvar=1:nx, pt.cex=0.9, main="Laplace", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mvs, lwd=2, lty=2, col="red")
-  plot_trend(theta=thvs.H, obstype="normal", obsvec=vs.norm, pt.cex=0.9, main="Horseshoe", 
+  plot_trend(theta=thvs.H, obstype="normal", obsvar=vs.norm, xvar=1:nx, pt.cex=0.9, main="Horseshoe", 
 		xlab="", ylab="", ylim=yrng)
   lines(1:nx, mvs, lwd=2, lty=2, col="red")
   legend(x="topleft", legend=c("Truth", "Median", "95% BCI"), col=c("red", "blue","lightblue"),
