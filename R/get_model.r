@@ -578,7 +578,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	real logp[N];
 
 	for (i in 1:N){
-		pp[j] = (y[i]+0.0)/(Nsize[i]+0.0);
+		pp[i] = (y[i]+0.0)/(sizeN[i]+0.0);
 		if (pp[i]==0.0)
 			pp[i] = 0.005;
 		if (pp[i]==1.0)
@@ -588,10 +588,10 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	if (likelihood=="binomial"){
 		tmp.b <- sub("YSTATE", "int <lower=0> y[N];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", bintrans, x=tmp.b)
-		tmp.b <- sub("//NSTATE", "int <lower=1> Nsize[N];", x=tmp.b)
+		tmp.b <- sub("//NSTATE", "int <lower=1> sizeN[N];", x=tmp.b)
 		tmp.b <- sub("MUYSTATE", "muy = logit(mean(pp));", x=tmp.b)
 		tmp.b <- sub("SDYSTATE", "sdy = sd(logp);", x=tmp.b)
-		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ binomial_logit(Nsize[i], theta[xrank1[i]]);\n}\n", x=tmp.b)
+		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ binomial_logit(sizeN[i], theta[xrank1[i]]);\n}\n", x=tmp.b)
 		tmp.b <- sub("//SIGPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)

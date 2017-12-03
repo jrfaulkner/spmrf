@@ -88,7 +88,7 @@ As with other examples in Faulkner and Minin (2017), we will fit three separate 
 
 Note that with 2,035 observations and with second order models these will take quite awhile to run. The code below sets up the models to run in sequence and the chains to run in sequence within each model.  When I ran these models, the normal model took about 19 minutes to run per chain, the Laplace model about 25 minutes per chain, and the horseshoe about 96 minutes per chain. The total time to run these three models in sequence was about 9.3 hours. Of course results will differ depending on your computer set up. If you are using a computer that has multiple processer cores you may consider trying to run the chains in paralell as described in the [Introduction to the spmrf package](introduction_to_spmrf.html) vignette.  
 
-Also note that the difficult posterior terrain induced by the horshoe model requires adjustment of some of the tuning parameters for the NUTS algorithm in `stan` to allow better adaptation during warmup and subsequently better performance during sampling. Divergent transitions after warmup may still occur, but a small number of them is not a problem if other posterior diagnostics look acceptable.
+Also note that the difficult posterior terrain induced by the horseshoe model requires adjustment of some of the tuning parameters for the NUTS algorithm in `stan` to allow better adaptation during warmup and subsequently better performance during sampling. Divergent transitions after warmup may still occur, but a small number of them is not a problem if other posterior diagnostics look acceptable.
 
 
 

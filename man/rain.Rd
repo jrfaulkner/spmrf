@@ -24,7 +24,7 @@ Kitagawa, G. 1987. Non-Gaussian state-space modeling of nonstationary time serie
 data(rain)
 
 ## create data list for passage to spmrf:
-tokyo_dat <- list(J=nrow(rain), N=rain$n.years, y=rain$n.rain)
+tokyo_dat <- list(y=rain$n.rain, sizeN=rain$n.years)
 
 }}
 \keyword{datasets}
