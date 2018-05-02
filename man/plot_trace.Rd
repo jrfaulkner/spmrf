@@ -27,4 +27,3 @@ Plots the posterior draws of a specified parameter by MCMC iteration with option
 \seealso{
 \code{\link[rstan]{stanfit}}, \code{\link[rstan]{extract}}, \code{\link[rstan]{as.array.stanfit}}, \code{\link{spmrf}}
 }
-

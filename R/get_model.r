@@ -1,9 +1,9 @@
 #' Generate model code for passage to stan
 #'
 #' Generates a text string of code describing the model of interest for passage to the \code{stan} function in the \pkg{rstan} package.  This function is called internally in the \code{spmrf} function.
-#' @param prior A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".
-#' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".
-#' @param order Numeric value specifying order of differencing (1, 2, or 3).
+#' @param prior A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.
+#' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", "binomial", and "coalescent".
+#' @param order Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.
 #' @param zeta The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.
 #' @return A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
 #' @details This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{spmrf} function internally, so it is not necessary to use \code{get_model} external to \code{spmrf}.
@@ -13,12 +13,14 @@
 
 get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.01){
 	# prior: ("horseshoe", "laplace", "normal")
-	# likelihood: ("normal", "poisson", "binomial")
+	# likelihood: ("normal", "poisson", "binomial", "coalescent")
 	# order: (1, 2, 3)
 
 	if (!(prior %in% c("horseshoe", "laplace", "normal"))) stop("Must specify prior of type 'normal', 'laplace' or 'horseshoe'.")
-  if (!(likelihood %in% c("normal", "poisson", "binomial"))) stop("Must specify likelihood of type 'normal', 'poisson' or 'binomial'.")
+  if (!(likelihood %in% c("normal", "poisson", "binomial", "coalescent"))) stop("Must specify likelihood of type 'normal', 'poisson', 'binomial', or 'coalescent'.")
 	if (!(order %in% c(1,2,3))) stop("Model must be of order 1, 2, or 3.")
+  if (likelihood=="coalescent" & prior=="laplace") stop("Laplace priors are currently not supported with coalescent likelihoods")
+  if (likelihood=="coalescent" & order==3) stop("Order 3 models are currently not supported with coalescent likelihoods")
 	if (zeta <= 0) stop("zeta must be > 0.")
 
 	###  MODEL TEMPLATES  #########
@@ -532,6 +534,259 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  }
 	'
 
+	
+	
+	## Coalescent -- Normal Order 1
+	N_1_temp_coal <- '
+	functions {
+	  real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
+	    vector [nc] ll;
+	    real sll;
+	    ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+	    sll = sum(ll);
+	    return sll ;
+	  }
+	
+	}
+	
+	data {
+	  int <lower=1> J; //number of grid points (theta params)
+	  int <lower=1> N; //number of grid subsections
+	  vector <lower=0>[N] y; //auxillary coal indicator
+	  int <lower=1>  gridrep [J]; //number of reps per theta
+	  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+	  vector [N] dalpha; //delta alpha - subgrid widths 
+	  real log_mu; //mle for const Ne on log scale
+	 }
+	
+	parameters {
+	  vector [J-1] zdelta;
+	  real theta1;	
+	  real <lower=0, upper=1> zgam;
+	}
+	
+	transformed parameters {
+	  vector [J] theta;
+	  vector [N] ftheta;
+	  real <lower=0> gam;
+	
+	  gam = ZETAVAL*tan(zgam*pi()/2);
+	  theta[1] = theta1; 
+	  for (j in 1:(J-1)){
+	    theta[j+1] = gam*zdelta[j] + theta[j]; 
+	  }
+	  { int cnt;
+	    cnt = 0;
+	    for (j in 1:J){
+	      for (k in 1:gridrep[j]){
+	        cnt = cnt + 1;
+	        ftheta[cnt] = theta[j];
+	      }
+	    }
+	  }
+	}
+	
+	model {
+	  zgam ~ uniform(0, 1);
+	  theta1 ~ normal(log_mu, 10);
+	  zdelta ~ normal(0, 1);
+	  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha); //increment_log_prob(coal_loglik_log(ftheta, y, N, Aik, dalpha));
+	} 
+	'
+	
+## Coalescent -- Horseshoe Order 1
+H_1_temp_coal <- '
+ functions {
+    real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
+      vector [nc] ll;
+      real sll;
+      ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+      sll = sum(ll);
+      return sll ;
+    }
+  }
+
+ data {
+  int <lower=1> J; //number of grid points (theta params)
+  int <lower=1> N; //number of grid subsections
+  vector <lower=0>[N] y; //auxillary coal indicator
+  int <lower=1>  gridrep [J]; //number of reps per theta
+  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+  vector [N] dalpha; //delta alpha - subgrid widths 
+  real log_mu; //mle for const Ne on log scale
+ }
+
+ parameters {
+  vector [J-1] zdelta;
+  real theta1;	
+  vector <lower=0, upper=1> [J-1] ztau;
+  real <lower=0, upper=1> zgam;
+ }
+
+ transformed parameters {
+  vector [J] theta;
+  vector [N] ftheta;
+  real <lower=0> gam;
+  vector[J-1] tau;
+
+  gam = ZETAVAL*tan(zgam*pi()/2);
+  theta[1] = theta1;
+  for (j in 1:(J-1)){
+    tau[j] = gam*tan(ztau[j]*pi()/2);	
+    theta[j+1] = zdelta[j]*tau[j] + theta[j]; 
+  }
+  { int cnt;
+    cnt = 0;
+    for (j in 1:J){
+      for (k in 1:gridrep[j]){
+        cnt = cnt + 1;
+        ftheta[cnt] = theta[j];
+      }
+    }
+  }
+}
+
+ model {
+  zgam ~ uniform(0, 1);
+  ztau ~ uniform(0, 1); 
+  theta1 ~ normal(log_mu, 10);
+  zdelta ~ normal(0, 1);
+  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
+} 
+'
+
+## Coalescent -- Normal Order 2
+N_2_temp_coal <- ' 
+  functions {
+  	real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
+    vector [nc] ll;
+    real sll;
+    ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+    sll = sum(ll);
+    return sll ;
+  }
+ }
+
+ data {
+  int <lower=1> J; //number of grid points (theta params)
+  int <lower=1> N; //number of grid subsections
+  vector <lower=0>[N] y; //auxillary coal indicator
+  int <lower=1>  gridrep [J]; //number of reps per theta
+  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+  vector [N] dalpha; //delta alpha - subgrid widths 
+  real log_mu; //mle for const Ne on log scale
+ }
+
+ parameters {
+  vector [J-1] zdelta;
+  real theta1;	
+  real <lower=0, upper=1> zgam;
+  real <lower=0, upper=1> zptau2;
+ }
+
+ transformed parameters {
+  vector[J] theta;
+  vector[N] ftheta;
+  real <lower=0> gam;
+  real <lower=0> ptau2;
+
+  gam = ZETAVAL*tan(zgam*pi()/2);
+  ptau2 = gam/sqrt(3.0);
+  theta[1] = theta1 ; 
+  theta[2] = ptau2*zdelta[1] + theta[1];
+  for (j in 1:(J-2)){
+    theta[j+2] = gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
+  }
+
+  { int cnt;
+    cnt = 0;
+    for (j in 1:J){
+      for (k in 1:gridrep[j]){
+        cnt = cnt + 1;
+        ftheta[cnt] = theta[j];
+      }
+    }
+  }
+ }
+
+ model {
+  zgam ~ uniform(0, 1);
+  zptau2 ~ uniform(0, 1);
+  theta1 ~ normal(log_mu, 10);
+  zdelta ~ normal(0, 1);
+  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
+ }  
+'
+
+## Coalescent -- Normal Order 2
+H_2_temp_coal <- ' 
+ functions {
+	real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
+    vector [nc] ll;
+    real sll;
+    ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+    sll = sum(ll);
+    return sll ;
+  }
+ }
+
+ data {
+  int <lower=1> J; //number of grid points (theta params)
+  int <lower=1> N; //number of grid subsections
+  vector <lower=0>[N] y; //auxillary coal indicator
+  int <lower=1>  gridrep [J]; //number of reps per theta
+  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+  vector [N] dalpha; //delta alpha - subgrid widths 
+  real log_mu; //mle for const Ne on log scale
+ }
+
+ parameters {
+  vector [J-1] zdelta;
+  real theta1;	
+  vector <lower=0, upper=1>[J-2]  ztau;
+  real <lower=0, upper=1> zgam;
+  real <lower=0, upper=1> zptau2;
+ }
+
+ transformed parameters {
+  vector[J] theta;
+  vector[N] ftheta;
+  real <lower=0> gam;
+  real <lower=0> ptau2;
+  vector[J-2] tau;
+
+  gam = ZETAVAL*tan(zgam*pi()/2);
+  ptau2 = (gam/sqrt(3.0))*tan(zptau2*pi()/2);
+  theta[1] = theta1 ;
+  theta[2] = ptau2*zdelta[1] + theta[1];
+  for (j in 1:(J-2)){
+    tau[j] = gam*tan(ztau[j]*pi()/2);
+    theta[j+2] = zdelta[j+1]*tau[j] + 2*theta[j+1]-theta[j];
+  }
+
+  { int cnt;
+    cnt = 0;
+    for (j in 1:J){
+      for (k in 1:gridrep[j]){
+        cnt = cnt + 1;
+        ftheta[cnt] = theta[j];
+      }
+    }
+  }
+ }
+
+ model {
+  zgam ~ uniform(0, 1);
+  ztau ~ uniform(0, 1); 
+  zptau2 ~ uniform(0, 1);
+  theta1 ~ normal(log_mu, 10);
+  zdelta ~ normal(0, 1);
+  target += coal_loglik_log(ftheta, y, N, Aik, dalpha);
+ } 
+'
+
+	
+	
 	## find model template
 	options(scipen=25)
 	ms <- data.frame(matrix(NA, 9, 3))
@@ -597,7 +852,12 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "", x=tmp.b)
 	}
-
+	
+	if (likelihood=="coalescent" & prior=="normal" & order==1) tmp.b <- N_1_temp_coal
+	if (likelihood=="coalescent" & prior=="normal" & order==2) tmp.b <- N_2_temp_coal
+	if (likelihood=="coalescent" & prior=="horseshoe" & order==1) tmp.b <- H_1_temp_coal
+	if (likelihood=="coalescent" & prior=="horseshoe" & order==2) tmp.b <- H_2_temp_coal
+	
 	## replace gamma
 	tmp.c <- sub(pattern="ZETAVAL", replacement=zeta, x=tmp.b)
 	return(tmp.c)

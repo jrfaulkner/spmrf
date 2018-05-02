@@ -7,11 +7,11 @@
 get_init(prior = "horseshoe", likelihood = "normal", order = 1)
 }
 \arguments{
-\item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".}
+\item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".  Note that "laplace" priors are currently not available for coalescent likelihoods.}
 
-\item{likelihood}{A character string specifying the distribution of the observations. Choices are "normal", "poisson", and "binomial".}
+\item{likelihood}{A character string specifying the distribution of the observations. Choices are "normal", "poisson", "binomial", or "coalescent".}
 
-\item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
+\item{order}{Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.}
 }
 \value{
 An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{spmrf}. Parameters are appropriate to a model with specified prior, likelihood, and order.
@@ -22,4 +22,3 @@ Creates a function which generates initial parameter seeds for passing to \code{
 \seealso{
 \code{\link{spmrf}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 }
-

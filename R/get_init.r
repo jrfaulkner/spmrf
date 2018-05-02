@@ -1,109 +1,66 @@
 #' Generate function for initial parameter values
 #'
 #' Creates a function which generates initial parameter seeds for passing to \code{stan} internally via \code{spmrf}.
-#' @param prior A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".
-#' @param likelihood A character string specifying the distribution of the observations. Choices are "normal", "poisson", and "binomial".
-#' @param order Numeric value specifying order of differencing (1, 2, or 3).
+#' @param prior A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".  Note that "laplace" priors are currently not available for coalescent likelihoods.
+#' @param likelihood A character string specifying the distribution of the observations. Choices are "normal", "poisson", "binomial", or "coalescent".
+#' @param order Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.
 #' @return An object of class \code{function} for generating initial parameter seeds for passage to \code{stan} via \code{spmrf}. Parameters are appropriate to a model with specified prior, likelihood, and order.
 #' @seealso \code{\link{spmrf}}, \code{\link[rstan]{stan}}, \code{\link{get_model}}
 #' @export
 
 get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
   # prior: ("horseshoe", "laplace", "normal")
-  # likelihood: ("normal", "poisson", "binomial")
+  # likelihood: ("normal", "poisson", "binomial", "coalescent")
   # order: (1, 2, 3)
 
 	if (!(prior %in% c("horseshoe", "laplace", "normal"))) stop("Must specify prior of type 'normal', 'laplace' or 'horseshoe'.")
-  if (!(likelihood %in% c("normal", "poisson", "binomial"))) stop("Must specify likelihood of type 'normal', 'poisson' or 'binomial'.")
+  if (!(likelihood %in% c("normal", "poisson", "binomial", "coalescent"))) stop("Must specify likelihood of type 'normal', 'poisson', 'binomial', or 'coalescent'.")
 	if (!(order %in% c(1,2,3))) stop("Model must be of order 1, 2, or 3.")
-
+  if (likelihood=="coalescent" & prior=="laplace") stop("Laplace priors are currently not supported with coalescent likelihoods")
+  if (likelihood=="coalescent" & order==3) stop("Order 3 models are currently not supported with coalescent likelihoods")
+  
   ## --- ORDER 1 --- ##
 	# Horseshoe
 	initf_H_1 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-1, 0.25, .75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-1)
-		tth[1] <- 2*sdy*zth1 + muy
-		for (zz in 1:(dat$J-1)){
-			tu[zz] <- gm*tan(ztau[zz]*pi/2)
-			tth[zz+1] <- zdel[zz]*tu[zz] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zgam = zgm,
 			ztau = ztau,
-			SIG
-			gam = gm,
-			theta = tth,
-			tau = tu
 			)
 	}'
 
 	##  Laplace (Double Exponential)
 	initf_L_1 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-1, 0.25, .75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-1)
-		tth[1] <- 2*sdy*zth1 + muy
-		for (zz in 1:(dat$J-1)){
-			tu[zz] <- gm*sqrt(-2*log(1-zta2[zz]))
-			tth[zz+1] <- zdel[zz]*tu[zz] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zgam = zgm,
-			ztau2 = zta2,
-			SIG
-			gam = gm,
-			theta = tth,
-			tau = tu
+			ztau2 = zta2
 			)
 	}'
 
 
 	## Normal  (GMRF with constant precision)
 	initf_N_1 <-  'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zgm <- runif(1, 0.25, 0.75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		tth <- numeric(dat$J)
-		tth[1] <- 2*sdy*zth1 + muy
-		for (zz in 1:(dat$J-1)){
-			tth[zz+1] <- gm*zdel[zz] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zgam = zgm,
-			SIG
-			gam = gm,
-			theta = tth
+			zgam = zgm
 			)
 	}'
 
@@ -111,37 +68,18 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 	## --- ORDER 2 --- ##
 	# Horseshoe
 	initf_H_2 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-2, 0.25, .75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- gm*sqrt(1/3)*tan(zpt2*pi/2)
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-2)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		for (zz in 1:(dat$J-2)){
-			tu[zz] <- gm*tan(ztau[zz]*pi/2)
-			tth[zz+2] <- zdel[zz+1]*tu[zz] + 2*tth[zz+1]-tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zptau2 = zpt2,
 			zgam = zgm,
-			ztau = ztau,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2,
-			tau = tu
+			ztau = ztau
 			)
 	}'
 
@@ -149,66 +87,31 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 
 	##  Laplace (Double Exponential)
 	initf_L_2 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zpt2 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-2, 0.25, 0.75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- gm*sqrt(-(2/3.0)*log(1-zpt2))
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-1)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		for (zz in 1:(dat$J-2)) {
-			tu[zz] <- gm*sqrt(-2*log(1-zta2[zz]))
-			tth[zz+2] <- zdel[zz+1]*tu[zz] + 2*tth[zz+1]-tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zptau2 = zpt2,
 			zgam = zgm,
-			ztau2 = zta2,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2,
-			tau = tu
+			ztau2 = zta2
 			)
 	}'
 
 	##  Normal (GMRF)
 	initf_N_2 <-  'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zgm <- runif(1, 0.25, 0.75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- (gm/sqrt(3))
-		tth <- numeric(dat$J)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		for (zz in 1:(dat$J-2)){
-			tth[zz+2] <- gm*zdel[zz+1] + 2*tth[zz+1] - tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zgam = zgm,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2
+			zgam = zgm
 			)
 	}'
 
@@ -217,9 +120,6 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 
 	# Horseshoe
 	initf_H_3 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
@@ -227,41 +127,19 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		zpt3 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		ztau <- runif(dat$J-3, 0.25, .75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- gm*sqrt(1/10)*tan(zpt2*pi/2)
-		pt3 <- gm*sqrt(3/10)*tan(zpt3*pi/2)
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-3)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
-		for (zz in 1:(dat$J-3)){
-			tu[zz] <- gm*tan(ztau[zz]*pi/2)
-			tth[zz+3] <- zdel[zz+2]*tu[zz] + 3*tth[zz+2] - 3*tth[zz+1] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zptau2 = zpt2,
 			zptau3 = zpt3,
 			zgam = zgm,
-			ztau = ztau,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2,
-			ptau3 = pt3,
-			tau = tu
+			ztau = ztau
 			)
 	}'
 
 
 	##  Laplace (Double Exponential)
 	initf_L_3 <- 'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
@@ -269,64 +147,26 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 		zpt3 <- runif(1, 0.25, 0.75)
 		zgm <- runif(1, 0.25, 0.75)
 		zta2 <- runif(dat$J-3, 0.25, 0.75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- gm*sqrt(-(1/5.0)*log(1-zpt2))
-		pt3 <- gm*sqrt(-(3/5.0)*log(1-zpt3))
-		tth <- numeric(dat$J)
-		tu <- numeric(dat$J-3)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
-		for (zz in 1:(dat$J-3)) {
-			tu[zz] <- gm*sqrt(-2*log(1-zta2[zz]))
-			tth[zz+3] <- zdel[zz+2]*tu[zz] + 3*tth[zz+2] - 3*tth[zz+1] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zptau2 = zpt2,
 			zptau3 = zpt3,
 			zgam = zgm,
-			ztau2 = zta2,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2,
-			ptau3 = pt3,
-			tau = tu
+			ztau2 = zta2
 			)
 	}'
 
 	##  Normal (GMRF)
 	initf_N_3 <-  'function(chain_id=1, dat=tmp.dat) {
-		LGYSET
-		MUYSET
-		SDYSET
 		ZSIGSET
 		zdel <- runif(dat$J-1, -1, 1)
 		zth1 <- runif(1, -1, 1)
 		zgm <- runif(1, 0.25, 0.75)
-		SIGSET
-		gm <- 0.1*tan(zgm*pi/2)
-		pt2 <- gm*sqrt(1/10)
-		pt3 <- gm*sqrt(3/10)
-		tth <- numeric(dat$J)
-		tth[1] <- 2*sdy*zth1 + muy
-		tth[2] <- pt2*zdel[1] + tth[1]
-		tth[3] <- pt3*zdel[2] + 2*tth[2] - tth[1]
-		for (zz in 1:(dat$J-3)){
-		   tth[zz+3] <- gm*zdel[zz+2] + 3*tth[zz+2] - 3*tth[zz+1] + tth[zz]
-		}
 		list(ZSIG
 			zdelta =  zdel,
 			ztheta1 = zth1,
-			zgam = zgm,
-			SIG
-			gam = gm,
-			theta = tth,
-			ptau2 = pt2,
-			ptau3 = pt3
+			zgam = zgm
 			)
 	}'
 
@@ -349,42 +189,82 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 
 	# replace likelihood-related statements
 	if (likelihood=="normal"){
-		tmp.b <- sub("LGYSET", "", x=tmp.a)
-		tmp.b <- sub("MUYSET", "muy <- mean(dat$y)", x=tmp.b)
-		tmp.b <- sub("SDYSET", "sdy <- sd(dat$y)", x=tmp.b)
-		tmp.b <- sub("ZSIGSET", "zsig <- runif(1, .25, .75)", x=tmp.b)
-		tmp.b <- sub("SIGSET", "sig <- 5*tan(zsig*pi/2)", x=tmp.b)
+		tmp.b <- sub("ZSIGSET", "zsig <- runif(1, .25, .75)", x=tmp.a)
 		tmp.b <- sub("ZSIG", "zsigma = zsig,", x=tmp.b)
-		tmp.b <- sub("SIG", "sigma = sig,", x=tmp.b)
 	}
 
 	if (likelihood=="poisson"){
-		tmp.b <- sub("LGYSET", "", x=tmp.a)
-		tmp.b <- sub("MUYSET", "muy <- log(mean(dat$y))", x=tmp.b)
-		tmp.b <- sub("SDYSET", "sdy <- sd(log(dat$y))", x=tmp.b)
-		tmp.b <- sub("ZSIGSET", "", x=tmp.b)
-		tmp.b <- sub("SIGSET", "", x=tmp.b)
+		tmp.b <- sub("ZSIGSET", "", x=tmp.a)
 		tmp.b <- sub("ZSIG", "", x=tmp.b)
-		tmp.b <- sub("SIG", "", x=tmp.b)
 	}
-
-	bintrans <- 'pp <- dat$y/dat$N
-	pp[pp==0.0] <- 0.005
-	pp[pp==1.0] <- 0.995
-	logitp <- qlogis(pp) \n'
 
 
 	if (likelihood=="binomial"){
-		tmp.b <- sub("LGYSET", bintrans, x=tmp.a)
-		tmp.b <- sub("MUYSET", "muy <- qlogis(mean(pp))", x=tmp.b)
-		tmp.b <- sub("SDYSET", "sdy <- sd(logitp)", x=tmp.b)
-		tmp.b <- sub("ZSIGSET", "", x=tmp.b)
-		tmp.b <- sub("SIGSET", "", x=tmp.b)
+		tmp.b <- sub("ZSIGSET", "", x=tmp.a)
 		tmp.b <- sub("ZSIG", "", x=tmp.b)
-		tmp.b <- sub("SIG", "", x=tmp.b)
 	}
 
 
+	if (likelihood=="coalescent" & prior=="normal" & order==1) {
+    tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
+     zdel <- rnorm(dat$J-1, 0, 2)
+	   th1 <- rnorm(1, dat$log_mu, sd=1.5)
+	   zgm <- runif(1, 0.25, 0.75)
+	   list(zdelta =  zdel,
+	   theta1 = th1,
+	   zgam = zgm
+	   )
+     }'
+	}
+
+	if (likelihood=="coalescent" & prior=="normal" & order==2) {
+	  tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
+        zdel <- rnorm(dat$J-1, 0, 4)
+	  th1 <- rnorm(1, dat$log_mu, sd=.5)
+	  zpt2 <- runif(1, 0.25, 0.75)
+	  zgm <- runif(1, 0.4, 0.6)
+	  
+	  list(zdelta =  zdel,
+	  theta1 = th1, 
+	  zptau2 = zpt2,
+	  zgam = zgm
+	  )
+	}' 
+	}
+	  
+	if (likelihood=="coalescent" & prior=="horseshoe" & order==1) {
+	 tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
+    zdel <- rnorm(dat$J-1, 0, 2)
+	 th1 <- rnorm(1, dat$log_mu, sd=1.5)
+	 zgm <- runif(1, 0.25, 0.75)
+	 ztau <- runif(dat$J-1, 0.25, .75)
+	 
+	 list(zdelta =  zdel,
+	 theta1 = th1,
+	 zgam = zgm,
+	 ztau = ztau
+	 )
+	}'
+	}
+
+	if (likelihood=="coalescent" & prior=="horseshoe" & order==2) {
+	  tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
+        zdel <- rnorm(dat$J-1, 0, 4)
+	  th1 <- rnorm(1, dat$log_mu, sd=.5)
+	  zpt2 <- runif(1, 0.25, 0.75)
+	  zgm <- runif(1, 0.4, 0.6)
+	  ztau <- runif(dat$J-2, 0.4, .6)
+	  
+	  list(zdelta =  zdel,
+	  theta1 = th1, 
+	  zptau2 = zpt2,
+	  zgam = zgm,
+	  ztau = ztau
+	  )
+	}'
+
+	}	  
+		
 	ptmp <- parse(text=tmp.b)
 	outf <- eval(ptmp)
 	return(outf)

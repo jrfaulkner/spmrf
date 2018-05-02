@@ -29,7 +29,7 @@ A numeric scalar value for the hyperparmeter \code{zeta}, where \code{zeta} > 0.
 This function can be used to calculate reasonable values for the hyperparameter \code{zeta}, which controls the scale (and median) of the half-Cauchy prior on the global smoothing parameter for the latent field of trend parameters of an \code{spmrf} model.
 }
 \details{
-The   Making \code{alpha} smaller will decrease the size of \code{zeta}, which will result in smoother latent trends if the information in the data does not overcome the prior information. 
+Making \code{alpha} smaller will decrease the size of \code{zeta}, which will result in smoother latent trends if the information in the data does not overcome the prior information. 
 
 The methods for calculation of the hyperparameter \code{zeta} are outlined in Faulkner and Minin (2017) and are based on methods introduced by Sorbye and Rue (2014) for setting hyperparameters for the precision of Gaussian Markov random field priors.
 }
@@ -41,4 +41,3 @@ Sorbye, S. and H. Rue.  2014.  Scaling intrinsic Gaussian Markov random field pr
 \seealso{
 \code{\link{spmrf}}
 }
-

@@ -8,11 +8,11 @@ get_model(prior = "horseshoe", likelihood = "normal", order = 1,
   zeta = 0.01)
 }
 \arguments{
-\item{prior}{A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal".}
+\item{prior}{A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.}
 
-\item{likelihood}{A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".}
+\item{likelihood}{A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", "binomial", and "coalescent".}
 
-\item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
+\item{order}{Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.}
 
 \item{zeta}{The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.}
 }
@@ -28,4 +28,3 @@ This function can be used to generate a text string containing code in the \code
 \seealso{
 \code{\link{spmrf}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
 }
-

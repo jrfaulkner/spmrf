@@ -10,11 +10,11 @@ spmrf(prior = "horseshoe", likelihood = "normal", order = 1,
   max_treedepth = 12), ...)
 }
 \arguments{
-\item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal".}
+\item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.}
 
-\item{likelihood}{A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", and "binomial".}
+\item{likelihood}{A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson","binomial", and "coalescent".}
 
-\item{order}{Numeric value specifying order of differencing (1, 2, or 3).}
+\item{order}{Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.}
 
 \item{zeta}{The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.}
 
@@ -47,12 +47,13 @@ This function first internally creates \code{stan} model code and a function to 
 
 \code{spmrf} can also be used to sample again from a fitted model under different settings (e.g., different \code{iter}) by providing argument \code{fit}. In this case, the compiled C++ code for the model is reused.
 
-The list specified by the \code{data} argument must contain an element named \code{y}, which is the vector of the response or observation variable. If the observation variable is binary or binomial, a vector of counts representing the number of 'trials' per observation must also be present and named \code{sizeN} and of the same length as \code{y}. If the observations are on an equally spaced grid with a single observation per grid location, then the \code{xvar1} element can be left unspecified. However, if there are more than one observation per grid location, or if the grid locations are unequally spaced, or if the response is being modeled as a function of a continuous covariate, then an a vector of grid locations or covariate values for each observation must be specified with element name \code{xvar1} and must be of the same length as \code{y}.
+For any data that is not coalescent data, the list specified by the \code{data} argument must contain an element named \code{y}, which is the vector of the response or observation variable. If the observation variable is binary or binomial, a vector of counts representing the number of 'trials' per observation must also be present and named \code{sizeN} and of the same length as \code{y}. If the observations are on an equally spaced grid with a single observation per grid location, then the \code{xvar1} element can be left unspecified. However, if there are more than one observation per grid location, or if the grid locations are unequally spaced, or if the response is being modeled as a function of a continuous covariate, then an a vector of grid locations or covariate values for each observation must be specified with element name \code{xvar1} and must be of the same length as \code{y}.  
+
+For coalescent data, there are several critical elements that must be included in the the list specified by the \code{data} argument.  These elements are automatically included when the function \code{make_coalescent_data} is used to generate the data list. See the description of the \code{make_coalescent_data} function for details.
 }
 \references{
-Faulkner, J. R., and V. N. Minin. 2017. Locally adaptive smoothing with Markov random fields and shrinkage priors. \emph{Bayesian Analysis} advance publication online.
+Faulkner, J. R., and V. N. Minin. 2018. Locally adaptive smoothing with Markov random fields and shrinkage priors. \emph{Bayesian Analysis} 13(1):225--252.
 }
 \seealso{
-\code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, and \code{\link{get_init}}
+\code{\link[rstan]{stan}}, \code{\link[rstan]{stanfit}}, \code{\link{get_model}}, \code{\link{get_init}}, \code{\link{set_zeta}}, and \code{\link{make_coalescent_data}}
 }
-

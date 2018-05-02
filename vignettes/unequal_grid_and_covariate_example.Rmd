@@ -9,7 +9,7 @@ vignette: >
 ---
 
 
-The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package for cases when the observations are measured on a grid with unequal spacing or when there are mutliple observations per grid location.  The case with unequal grid spacing can be applied to a nonparametric regression setting where the observations are regressed against a continuous covariate.  We explore a data example using data on rental prices in Munich as a function of a continuous covariate, which was presented in the supplemental materials for Faulkner and Minin (2017). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
+The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package for cases when the observations are measured on a grid with unequal spacing or when there are mutliple observations per grid location.  The case with unequal grid spacing can be applied to a nonparametric regression setting where the observations are regressed against a continuous covariate.  We explore a data example using data on rental prices in Munich as a function of a continuous covariate, which was presented in the supplemental materials for Faulkner and Minin (2018). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
 
 The approach for dealing with multiple observations per location, grids with unequally spaced locations, or continuous covariates is the same. The default assumption is that data are measured on a grid with equally-spaced locations and there is a single observation per location.  If that is the case, there is no need to specify the variable `xvar1` in the data list. However, if that is not the case, then the variable `xvar1` will provide the measurement locations (e.g., times) or covariate values.
 
@@ -69,7 +69,7 @@ mun_dat <- list(y = munich$rent, xvar1 = munich$fsize)
 
 ### Set the Hyperparameters
 
-Next we want to get reasonable values for the hyperparameter `zeta`, which controls the scale (and median) of the prior on the global scale parameter `gamma` (see Faulkner and Minin (2017) for details).  We will be using second order models and will assume the rent values are normally distributed conditional on the trend. We will use a probability of `alpha` = 0.05 that the marginal standard deviation of the trend parameters will exceed the upper bound, where the upper bound is set equal to the standard deviation of the response variable. The following code calculates a value of `zeta` given these assumptions for the floor size variable. The same value of `zeta` will be used for each model.  We have to calculate the number of unique grid locations (covariate values) first before calculating `zeta`.
+Next we want to get reasonable values for the hyperparameter `zeta`, which controls the scale (and median) of the prior on the global scale parameter `gamma` (see Faulkner and Minin (2018) for details).  We will be using second order models and will assume the rent values are normally distributed conditional on the trend. We will use a probability of `alpha` = 0.05 that the marginal standard deviation of the trend parameters will exceed the upper bound, where the upper bound is set equal to the standard deviation of the response variable. The following code calculates a value of `zeta` given these assumptions for the floor size variable. The same value of `zeta` will be used for each model.  We have to calculate the number of unique grid locations (covariate values) first before calculating `zeta`.
 
 ```{r eval=FALSE}
 
@@ -84,7 +84,7 @@ zeta_fs <- set_zeta(yvec = munich$rent, linkfun = "identity", ncell = nfs, alpha
 
 ### Run Models
 
-As with other examples in Faulkner and Minin (2017), we will fit three separate models, where each has a different configuration for the prior distributions on the order-2 differences in latent function values (normal, Laplace, and horseshoe). We will use se  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `spmrf` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  
+As with other examples in Faulkner and Minin (2018), we will fit three separate models, where each has a different configuration for the prior distributions on the order-2 differences in latent function values (normal, Laplace, and horseshoe). We will use se  The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the `spmrf` function.  Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.  
 
 Note that with 2,035 observations and with second order models these will take quite awhile to run. The code below sets up the models to run in sequence and the chains to run in sequence within each model.  When I ran these models, the normal model took about 19 minutes to run per chain, the Laplace model about 25 minutes per chain, and the horseshoe about 96 minutes per chain. The total time to run these three models in sequence was about 9.3 hours. Of course results will differ depending on your computer set up. If you are using a computer that has multiple processer cores you may consider trying to run the chains in paralell as described in the [Introduction to the spmrf package](introduction_to_spmrf.html) vignette.  
 
@@ -187,4 +187,4 @@ dev.off()
 
 ## References
 
-Faulkner, J.R., and V.N. Minin.  2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413), Bayesian Analysis, advance publication.
+Faulkner, J.R., and V.N. Minin.  2018. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413). Bayesian Analysis 13(1):225-252.

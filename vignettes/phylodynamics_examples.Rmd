@@ -1,0 +1,119 @@
+---
+title: "Using `spmrf` for Phylodynamic Inference"
+author: "James Faulkner"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Phylodynamics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+
+
+The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package applied to coalescent time data for phylodynamic inference of effective population size trajectories, as described in Faulkner et al. (2018). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package. Note that the `spmrf` function only operates on coalescent time data and cannot be used directly on sequence data nor to infer parameters for trait evolution models.
+
+
+## Install Necessary Packages
+
+Make sure you have `spmrf` and `rstan` installed, then load the libraries.
+
+```{r eval=FALSE}
+library(spmrf)
+library(rstan)
+```
+
+## Simulated Data Example
+
+We will start with a set of simulated coalescent data generated from a scenario used in Faulkner et al. (2018).  This example represents an extreme bottleneck in effective population size.  First we simulate the coalescent data given the specified population trajectory, set up the grid over which we will estimate effective population size, and create the data list for input to `spmrf`. Note that the effective population sizes are very small and that is only done to decrease the coalescent times to make the time scale more compact.
+
+
+```{r eval=FALSE}
+
+# Generate simulated data
+nsamp <- 500   #number of samples total
+nstart <- 50   #number of samples at time zero
+nbndry <- 101  #number of grid cell boundaries (number of cells plus 1)
+samp.end <- 8  #last potential sample time
+samptv <- c(0, sort(runif(nsamp-nstart, 0, samp.end)) ) #vector of sample times
+nsampv <- c(nstart, rep(1, nsamp-nstart))  #vector of number sampled
+# simulate coalescent times
+coaldat <- coaltimeSim(samp_times = samptv, n_sampled = nsampv, 
+			traj = bottleNeck_traj, lower_bound = 0.1, ne.max=1, ne.min=0.1, bstart=6, bend=4  )
+
+# Calculate a grid for estimation
+sgrid <- makeGrid(coal_times = coaldat$coal_times, samp_times = samptv, Ngrid=nbndry)
+
+# Make data set for input to spmrf
+cdat <-  make_coalescent_data(samp_times = samptv, n_sampled = nsampv, coal_times = coaldat$coal_times, grid = sgrid$grid)
+
+```
+
+We can take a look at what the population trajectory looks like by plotting it over the midpoints of the grid. Note that we reverse the coordinates of the x-axis so that we go backwards in time from the present.
+
+```{r eval=FALSE}
+
+# Calculate trajectory over the grid
+truetraj <- bottleNeck_traj(t = sgrid$midpts, lower_bound = 0.1, ne.max=1, ne.min=0.1, bstart=6, bend=4)
+
+# Plot
+plot(sgrid$midpts, truetraj, xlim=range(rev(sgrid$midpts)), ylim=c(0, 1.2), type="l", col="red",
+     xlab="Time before present", ylab="Effective population size")
+
+```
+
+Next we will fit the model using two different priors for the effective population size. The first prior is the standard Gaussian Markov random field (GMRF) and the second is the horseshoe Markov random field (HSMRF). The first step is to calculate a reasonable value for the hyperparameter `zeta`, which controls the scale of the half-Cauchy prior that controls the global level of smoothing in the models. We will use the same value of `zeta` for both models.  We then set up the MCMC settings and run the models. Note that once `spmrf` builds the model code and calls stan, the model code gets transfered to C++ and compiled.  This process takes about 30 seconds for each model.  For the GMRF model, once the code compilation was complete, each chain took approximately 45 seconds to run on my machine, for a total run time of about 4 minutes.  For the HSMRF model, each chain took about 2-3 minutes to run, for a total run time of about 12 minutes.  Once the sampling is complete for each model, we then capture the posterior samples and get posterior summariies for the effective population size parameters. 
+
+```{r eval=FALSE}
+
+# Set hyperparameter for global scale
+zeta <- set_zeta_phylo(phylo = coaldat, ncell = 100, alpha = 0.05, order = 1)
+
+# Parameters to keep 
+pars.G <- c("theta", "gam") 
+pars.H <- c("theta", "tau", "gam") 
+
+# MCMC settings
+nchain <- 4    #number of chains
+ntotsamp <- 2000  #total number of samples to keep across all chains
+nthin <- 2        #thinning level
+nburn <- 1000     #warm-up / burn-in iterations per chain
+niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run
+
+# Run models
+fit.G <- spmrf(prior="normal", likelihood="coalescent", order=1, data=cdat, par=pars.G, 
+					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=12), zeta=zeta)
+fit.H <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=cdat, par=pars.H, 
+					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=12), zeta=zeta)
+
+# Extract posterior draws
+pout.G <- as.array(fit.G)
+pout.H <- as.array(fit.H)
+
+# Get posterior summary for theta
+th.G <- extract_theta(fit.G, obstype="coalescent")
+th.H <- extract_theta(fit.H, obstype="coalescent")
+
+```
+
+Now we will take a look at some diagnostic trace plots.
+
+Finally we will plot the posterior median trajectories and 95% credible intervals for each model and compare them to the true trajectory that generated the data.
+
+## Hepatitis C Outbreak in Egypt
+
+This example uses coalescent data from a fixed genealogy estimated from sequence data from Egypt.  This is similar to the full analysis done on sequence data in Faulkner et al. (2018).
+
+
+```{r eval=FALSE}
+
+
+
+
+
+```
+
+
+
+## References
+
+Faulkner, J.R., A.F. Magee, B. Shapiro, and V.N. Minin.  2018. Locally-adaptive Bayesian nonparametric inference for phylodynamics. arXiv preprint to appear

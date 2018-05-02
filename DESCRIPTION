@@ -2,8 +2,8 @@ Package: spmrf
 Type: Package
 Title: Shrinkage-Prior Markov Random Field Smoothing
 Description: Contains functions for fitting Bayesian nonparametric adpative smoothing models with shrinkage prior Markov random fields (SPMRF) using the rstan package.
-Version: 1.1
-Date: 2017-10-11
+Version: 1.2
+Date: 2018-04-23
 Author: James Faulkner
 Maintainer: James Faulkner <jfaulknr@uw.edu>
 URL: http://github.com/jrfaulkner/spmrf
@@ -16,4 +16,4 @@ VignetteBuilder: knitr
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

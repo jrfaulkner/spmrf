@@ -9,7 +9,7 @@ extract_theta(mfit, obstype = "normal", alpha = 0.05)
 \arguments{
 \item{mfit}{An object containing posterior draws from a \code{spmrf} model fit or \code{stan} model fit.  The object can be of class \code{stanfit}, \code{array}, \code{matrix}, or \code{data.frame}.}
 
-\item{obstype}{Character string with the name of the probability distribution of the observations.  This controls the back-transformation of the process parameters.  Possible values for \code{obstype} are 'normal', 'poisson', or 'binomial'.}
+\item{obstype}{Character string with the name of the probability distribution of the observations.  This controls the back-transformation of the process parameters.  Possible values for \code{obstype} are 'normal', 'poisson', or 'binomial', or 'coalescent'.}
 
 \item{alpha}{Controls level for 100*(1-\code{alpha})\% Bayesian credible intervals. Values must be 0 < \code{alpha} < 1.}
 }
@@ -22,4 +22,3 @@ Extract theta (latent process) parameters from an object with posterior draws an
 \seealso{
 \code{\link[rstan]{stan}}, \code{\link[rstan]{as.array.stanfit}}, \code{\link[rstan]{as.matrix.stanfit}}, \code{\link[rstan]{as.data.frame.stanfit}}, \code{\link{spmrf}}
 }
-

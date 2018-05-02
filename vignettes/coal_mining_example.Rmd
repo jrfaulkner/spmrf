@@ -10,7 +10,7 @@ vignette: >
 
 
 
-The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2017). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
+The following document provides `R` code for fitting shrinkage prior Markov random field models using the `spmrf` package applied to a data example on coal mine disasters which is presented in Faulkner and Minin (2018). See the [Introduction to the spmrf package](introduction_to_spmrf.html) for instructions on installation and more details about the package.
 
 
 ## Data
@@ -115,7 +115,7 @@ dev.off()
 
 ## References
 
-Faulkner, J.R., and V.N. Minin.  2017. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413), Bayesian Analysis, advance publication.
+Faulkner, J.R., and V.N. Minin.  2018. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413). Bayesian Analysis 13(1):225-252.
 
 
 

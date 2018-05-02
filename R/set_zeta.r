@@ -10,7 +10,7 @@
 #' @param alpha The probability of exceeding \code{upBound}. 
 #' @param order The order of the SPMRF model (1, 2, or 3).
 #' 
-#' @details   The   Making \code{alpha} smaller will decrease the size of \code{zeta}, which will result in smoother latent trends if the information in the data does not overcome the prior information. 
+#' @details   Making \code{alpha} smaller will decrease the size of \code{zeta}, which will result in smoother latent trends if the information in the data does not overcome the prior information. 
 #' 
 #' The methods for calculation of the hyperparameter \code{zeta} are outlined in Faulkner and Minin (2017) and are based on methods introduced by Sorbye and Rue (2014) for setting hyperparameters for the precision of Gaussian Markov random field priors.
 

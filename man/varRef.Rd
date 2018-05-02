@@ -10,4 +10,3 @@ varRef(nn, kap, omg2, order = 1)
 This is an internal function used by the \code{set_zeta} function
 }
 \keyword{internal}
-
