@@ -15,6 +15,7 @@ The following vignettes provide some examples using the `spmrf` package with ste
 1. [Introduction to spmrf](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/introduction_to_spmrf.Rmd)
 2. [Coal Mining Example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/coal_mining_example.Rmd)
 3. [Unequal Grid and Covariates Example](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/unequal_grid_and_covariate_example.Rmd)
+4. [Phylodynamics Examples](https://github.com/jrfaulkner/spmrf/blob/master/vignettes/phylodynamics_examples.Rmd)
 
 ## References
 Faulkner, J. R., and V. N. Minin. 2018. [Locally adaptive smoothing with Markov random fields and shrinkage priors](http://projecteuclid.org/euclid.ba/1487905413). Bayesian Analysis 13(1):225-252.
