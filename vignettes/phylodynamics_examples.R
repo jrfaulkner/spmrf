@@ -108,9 +108,76 @@
 ## ----eval=FALSE----------------------------------------------------------
 #  
 #  # load the hcv data
+#  data(hcv)
+#  
+#  # turn into a data list
+#  hcvlist <- list(samp_times=hcv$samp_times[1], n_sampled=hcv$n_sampled[1], coal_times=hcv$coal_times)
+#  
+#  h.ngrid <- 75 # number of grid cells
+#  hgrid <- makeGrid(hcvlist$coal_times, hcvlist$samp_times, Ngrid=(h.ngrid+1))
+#  
+#  # make spmrf data set
+#  hdat <- make_coalescent_data(samp_times=hcvlist$samp_times, n_sampled=hcvlist$n_sampled, coal_times=hcvlist$coal_times, grid=hgrid$grid)
 #  
 #  
+
+## ----eval=FALSE----------------------------------------------------------
 #  
+#  # Set hyperparameter for global scale
+#  zeta.h <- set_zeta_phylo(phylo = hcvlist, ncell = 75, alpha = 0.01, order = 1)
+#  
+#  # Parameters to keep
+#  pars.G <- c("theta", "gam")
+#  pars.H <- c("theta", "tau", "gam")
+#  
+#  # MCMC settings
+#  nchain <- 4    #number of chains
+#  ntotsamp <- 3000  #total number of samples to keep across all chains
+#  nthin <- 1        #thinning level
+#  nburn <- 1000     #warm-up / burn-in iterations per chain
+#  niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run
+#  
+#  # Run models
+#  fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=12), zeta=zeta.h)
+#  
+#  fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=12), zeta=zeta.h)
+#  
+#  # Extract posterior draws
+#  pout.Gh <- as.array(fit.Gh)
+#  pout.Hh <- as.array(fit.Hh)
+#  
+#  # Get posterior summary for theta
+#  th.Gh <- extract_theta(fit.Gh, obstype="coalescent")
+#  th.Hh <- extract_theta(fit.Hh, obstype="coalescent")
+#  
+
+## ----eval=FALSE----------------------------------------------------------
+#  
+#  # Print parameter summaries
+#  print(fit.Gh, pars=pars.G)
+#  print(fit.Hh, pars=pars.H)
+#  
+#  # Some example trace plots for the horseshoe model
+#  plot_trace(pout.Hh, "theta[17]", pscale="original", stack=TRUE, colset="black")
+#  plot_trace(pout.Hh, "tau[17]", pscale="log", stack=TRUE, colset="black")
+#  plot_trace(pout.Hh, "gam", pscale="log", stack=TRUE, colset="black")
+#  
+
+## ----eval=FALSE----------------------------------------------------------
+#  
+#  hxrng <- rev(range(hgrid$midpts))
+#  hyrng <- range(th.Gh, th.Hh)
+#  
+#  png(filename='vignettes/figure/hcv_posterior_plots.png', width=1500, height=600, res=200)
+#    par(mfrow=c(1,2), mar=c(2,1.5,1.5,1), oma=c(2,2,0,0))
+#    plot_trend(theta=th.Gh, obstype="coalescent", xvar=hgrid$midpts, main="GMRF-1",
+#  		xlab="", ylab="", xlim=hxrng, ylim=hyrng, log="y")
+#    legend(x="topright", legend=c("Median", "95% BCI"), col=c("blue","lightblue"), lwd=3, bty="n", cex=0.8)
+#    plot_trend(theta=th.Hh, obstype="coalescent", xvar=hgrid$midpts, main="HSMRF-1",
+#  	  xlab="", ylab="", xlim=hxrng, ylim=hyrng, log="y")
+#   mtext(side=1, outer=T, line=1, text="Time before present", font=2, cex=0.8)
+#   mtext(side=2, outer=T, line=1, text="Effective population size", font=2, cex=0.8)
+#  dev.off()
 #  
 #  
 
