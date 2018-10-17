@@ -31,7 +31,7 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 			zdelta =  zdel,
 			ztheta1 = zth1,
 			zgam = zgm,
-			ztau = ztau,
+			ztau = ztau
 			)
 	}'
 
