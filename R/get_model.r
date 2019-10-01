@@ -561,7 +561,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	
 	parameters {
 	  vector [J-1] zdelta;
-	  real theta1;	
+	  real ztheta1;	
 	  real <lower=0, upper=1> zgam;
 	}
 	
@@ -571,7 +571,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  real <lower=0> gam;
 	
 	  gam = ZETAVAL*tan(zgam*pi()/2);
-	  theta[1] = theta1; 
+	  theta[1] = 10*ztheta1 + log_mu; 
 	  for (j in 1:(J-1)){
 	    theta[j+1] = gam*zdelta[j] + theta[j]; 
 	  }
@@ -588,9 +588,9 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	
 	model {
 	  zgam ~ uniform(0, 1);
-	  theta1 ~ normal(log_mu, 10);
+	  ztheta1 ~ normal(0, 1);
 	  zdelta ~ normal(0, 1);
-	  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha); //increment_log_prob(coal_loglik_log(ftheta, y, N, Aik, dalpha));
+	  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha); 
 	} 
 	'
 	
@@ -618,7 +618,7 @@ H_1_temp_coal <- '
 
  parameters {
   vector [J-1] zdelta;
-  real theta1;	
+  real ztheta1;	
   vector <lower=0, upper=1> [J-1] ztau;
   real <lower=0, upper=1> zgam;
  }
@@ -630,7 +630,7 @@ H_1_temp_coal <- '
   vector[J-1] tau;
 
   gam = ZETAVAL*tan(zgam*pi()/2);
-  theta[1] = theta1;
+  theta[1] = 10*ztheta1 + log_mu;
   for (j in 1:(J-1)){
     tau[j] = gam*tan(ztau[j]*pi()/2);	
     theta[j+1] = zdelta[j]*tau[j] + theta[j]; 
@@ -649,7 +649,7 @@ H_1_temp_coal <- '
  model {
   zgam ~ uniform(0, 1);
   ztau ~ uniform(0, 1); 
-  theta1 ~ normal(log_mu, 10);
+  ztheta1 ~ normal(log_mu, 10);
   zdelta ~ normal(0, 1);
   target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
 } 
@@ -679,9 +679,8 @@ N_2_temp_coal <- '
 
  parameters {
   vector [J-1] zdelta;
-  real theta1;	
+  real ztheta1;	
   real <lower=0, upper=1> zgam;
-  real <lower=0, upper=1> zptau2;
  }
 
  transformed parameters {
@@ -691,9 +690,8 @@ N_2_temp_coal <- '
   real <lower=0> ptau2;
 
   gam = ZETAVAL*tan(zgam*pi()/2);
-  ptau2 = gam/sqrt(3.0);
-  theta[1] = theta1 ; 
-  theta[2] = ptau2*zdelta[1] + theta[1];
+	theta[1] = 10*ztheta1 + log_mu; 
+	theta[2] = sqrt(0.5)*gam*zdelta[1] + theta[1];
   for (j in 1:(J-2)){
     theta[j+2] = gam*zdelta[j+1] + 2*theta[j+1]-theta[j];
   }
@@ -711,8 +709,7 @@ N_2_temp_coal <- '
 
  model {
   zgam ~ uniform(0, 1);
-  zptau2 ~ uniform(0, 1);
-  theta1 ~ normal(log_mu, 10);
+  ztheta1 ~ normal(0, 1);
   zdelta ~ normal(0, 1);
   target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
  }  
@@ -742,7 +739,7 @@ H_2_temp_coal <- '
 
  parameters {
   vector [J-1] zdelta;
-  real theta1;	
+  real ztheta1;	
   vector <lower=0, upper=1>[J-2]  ztau;
   real <lower=0, upper=1> zgam;
   real <lower=0, upper=1> zptau2;
@@ -756,8 +753,8 @@ H_2_temp_coal <- '
   vector[J-2] tau;
 
   gam = ZETAVAL*tan(zgam*pi()/2);
-  ptau2 = (gam/sqrt(3.0))*tan(zptau2*pi()/2);
-  theta[1] = theta1 ;
+  ptau2 = (gam/sqrt(2.0))*tan(zptau2*pi()/2);
+  theta[1] = 10*ztheta1 + log_mu ;
   theta[2] = ptau2*zdelta[1] + theta[1];
   for (j in 1:(J-2)){
     tau[j] = gam*tan(ztau[j]*pi()/2);
@@ -779,9 +776,9 @@ H_2_temp_coal <- '
   zgam ~ uniform(0, 1);
   ztau ~ uniform(0, 1); 
   zptau2 ~ uniform(0, 1);
-  theta1 ~ normal(log_mu, 10);
+  ztheta1 ~ normal(0, 1);
   zdelta ~ normal(0, 1);
-  target += coal_loglik_log(ftheta, y, N, Aik, dalpha);
+  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
  } 
 '
 

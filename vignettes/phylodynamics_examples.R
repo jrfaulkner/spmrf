@@ -31,16 +31,9 @@
 #  truetraj <- bottleNeck_traj(t = sgrid$midpts, lower_bound = 0.1, ne.max=1, ne.min=0.1, bstart=6, bend=4)
 #  
 #  # Plot
-#  plot(sgrid$midpts, truetraj, xlim=range(rev(sgrid$midpts)), ylim=c(0, 1.2), type="l", col="red",
+#  
+#  plot(sgrid$midpts, truetraj, xlim=rev(range(sgrid$midpts)), ylim=c(0, 1.2), type="l", col="red",
 #       xlab="Time before present", ylab="Effective population size")
-#  
-#  png(file="vignettes/figure/phylo_bottleneck_traj.png", width=1000, height=600)
-#  par(font.axis=2, font.lab=2)
-#  plot(sgrid$midpts, truetraj, xlim=range(rev(sgrid$midpts)), ylim=c(0, 1.2), type="l", col="red",
-#       xlab="Time before present", ylab="Effective population size", lwd=3)
-#  dev.off()
-#  
-#  
 
 ## ----eval=FALSE----------------------------------------------------------
 #  

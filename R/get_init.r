@@ -208,10 +208,10 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 	if (likelihood=="coalescent" & prior=="normal" & order==1) {
     tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
      zdel <- rnorm(dat$J-1, 0, 2)
-	   th1 <- rnorm(1, dat$log_mu, sd=1.5)
+	   zth1 <- rnorm(1, 0, sd=0.5)
 	   zgm <- runif(1, 0.25, 0.75)
 	   list(zdelta =  zdel,
-	   theta1 = th1,
+	   ztheta1 = zth1,
 	   zgam = zgm
 	   )
      }'
@@ -220,13 +220,11 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 	if (likelihood=="coalescent" & prior=="normal" & order==2) {
 	  tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
         zdel <- rnorm(dat$J-1, 0, 4)
-	  th1 <- rnorm(1, dat$log_mu, sd=.5)
-	  zpt2 <- runif(1, 0.25, 0.75)
+	  zth1 <- rnorm(1, 0, sd=0.5)
 	  zgm <- runif(1, 0.4, 0.6)
 	  
 	  list(zdelta =  zdel,
-	  theta1 = th1, 
-	  zptau2 = zpt2,
+	  ztheta1 = zth1, 
 	  zgam = zgm
 	  )
 	}' 
@@ -235,12 +233,12 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 	if (likelihood=="coalescent" & prior=="horseshoe" & order==1) {
 	 tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
     zdel <- rnorm(dat$J-1, 0, 2)
-	 th1 <- rnorm(1, dat$log_mu, sd=1.5)
+	 zth1 <- rnorm(1, 0, sd=0.5)
 	 zgm <- runif(1, 0.25, 0.75)
 	 ztau <- runif(dat$J-1, 0.25, .75)
 	 
 	 list(zdelta =  zdel,
-	 theta1 = th1,
+	 ztheta1 = zth1,
 	 zgam = zgm,
 	 ztau = ztau
 	 )
@@ -250,13 +248,13 @@ get_init <- function(prior="horseshoe", likelihood="normal", order=1) {
 	if (likelihood=="coalescent" & prior=="horseshoe" & order==2) {
 	  tmp.b <- 'function(chain_id=1, dat=tmp.dat) {
         zdel <- rnorm(dat$J-1, 0, 4)
-	  th1 <- rnorm(1, dat$log_mu, sd=.5)
+	  zth1 <- rnorm(1, 0, sd=0.5)
 	  zpt2 <- runif(1, 0.25, 0.75)
 	  zgm <- runif(1, 0.4, 0.6)
 	  ztau <- runif(dat$J-2, 0.4, .6)
 	  
 	  list(zdelta =  zdel,
-	  theta1 = th1, 
+	  ztheta1 = zth1, 
 	  zptau2 = zpt2,
 	  zgam = zgm,
 	  ztau = ztau
