@@ -536,7 +536,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 
 	
 	
-	## Coalescent -- Normal Order 1
+	## Coalescent -- GMRF Order 1
 	N_1_temp_coal <- '
 	functions {
 	  real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
@@ -655,7 +655,7 @@ H_1_temp_coal <- '
 } 
 '
 
-## Coalescent -- Normal Order 2
+## Coalescent -- GMRF Order 2
 N_2_temp_coal <- ' 
   functions {
   	real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {
@@ -687,7 +687,6 @@ N_2_temp_coal <- '
   vector[J] theta;
   vector[N] ftheta;
   real <lower=0> gam;
-  real <lower=0> ptau2;
 
   gam = ZETAVAL*tan(zgam*pi()/2);
 	theta[1] = 10*ztheta1 + log_mu; 
@@ -715,7 +714,7 @@ N_2_temp_coal <- '
  }  
 '
 
-## Coalescent -- Normal Order 2
+## Coalescent -- Horseshoe Order 2
 H_2_temp_coal <- ' 
  functions {
 	real coal_loglik_lp(vector ft, vector yy, int nc, vector aik, vector da) {

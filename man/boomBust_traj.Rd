@@ -4,7 +4,8 @@
 \alias{boomBust_traj}
 \title{Boom-bust trajectory}
 \usage{
-boomBust_traj(x, mf, sf, soff, sscale, snht, bloc, bscale, bht, tmx = NULL)
+boomBust_traj(x, mf, sf, soff, sscale, snht, bloc, bscale, bht,
+  tmx = NULL)
 }
 \description{
 A boom-bust scenario where population experiences a sharp increase and sharp decline. This function has been used elsewhere and is also known as the 'Mexican hat' function.

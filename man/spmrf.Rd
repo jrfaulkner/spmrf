@@ -5,9 +5,9 @@
 \title{Fit Bayesian nonparametric adaptive smoothing model}
 \usage{
 spmrf(prior = "horseshoe", likelihood = "normal", order = 1,
-  zeta = 0.01, fit = NA, data, pars = NA, chains = 4, iter = 2000,
-  warmup = floor(iter/2), thin = 1, control = list(adapt_delta = 0.95,
-  max_treedepth = 12), ...)
+  zeta = 0.01, fit = NA, data, pars = NA, chains = 4,
+  iter = 2000, warmup = floor(iter/2), thin = 1,
+  control = list(adapt_delta = 0.95, max_treedepth = 12), ...)
 }
 \arguments{
 \item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.}

@@ -85,13 +85,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 nloc &lt;-<span class="st"> </span><span class="dv">50</span>
 
 <span class="co"># number of observations per grid location</span>
-nobs_per_loc &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">5</span>, <span class="dt">size=</span>nloc, <span class="dt">replace=</span>T) 
+nobs_per_loc &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dt">size=</span>nloc, <span class="dt">replace=</span>T) 
 
 <span class="co"># location ID variable</span>
-locID &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">1</span>:nloc, nobs_per_loc)
+locID &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">1</span><span class="op">:</span>nloc, nobs_per_loc)
 
 <span class="co"># value of underlying trend function for each obs</span>
-mu.vec &lt;-<span class="st"> </span><span class="dv">10</span> +<span class="st"> </span><span class="dv">20</span>*<span class="kw">sin</span>(<span class="dv">2</span>*pi*locID/nloc ) 
+mu.vec &lt;-<span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span><span class="dv">20</span><span class="op">*</span><span class="kw">sin</span>(<span class="dv">2</span><span class="op">*</span>pi<span class="op">*</span>locID<span class="op">/</span>nloc ) 
 
 <span class="co"># generate normal obs</span>
 y.vec &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dt">n=</span><span class="kw">length</span>(mu.vec), <span class="dt">mean=</span>mu.vec, <span class="dt">sd=</span><span class="dv">2</span>)</code></pre></div>
@@ -110,20 +110,20 @@ multi_dat &lt;-<span class="st"> </span><span class="kw">list</span>(<span class
 
 <span class="co"># Set up data list for spmrf</span>
 <span class="co"># for using floor size as the covariate</span>
-mun_dat &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">y =</span> munich$rent, <span class="dt">xvar1 =</span> munich$fsize)</code></pre></div>
+mun_dat &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">y =</span> munich<span class="op">$</span>rent, <span class="dt">xvar1 =</span> munich<span class="op">$</span>fsize)</code></pre></div>
 </div>
 <div id="set-the-hyperparameters" class="section level3">
 <h3>Set the Hyperparameters</h3>
 <p>Next we want to get reasonable values for the hyperparameter <code>zeta</code>, which controls the scale (and median) of the prior on the global scale parameter <code>gamma</code> (see Faulkner and Minin (2018) for details). We will be using second order models and will assume the rent values are normally distributed conditional on the trend. We will use a probability of <code>alpha</code> = 0.05 that the marginal standard deviation of the trend parameters will exceed the upper bound, where the upper bound is set equal to the standard deviation of the response variable. The following code calculates a value of <code>zeta</code> given these assumptions for the floor size variable. The same value of <code>zeta</code> will be used for each model. We have to calculate the number of unique grid locations (covariate values) first before calculating <code>zeta</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Calculate number of grid locations for covariate</span>
-nfs &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(munich$fsize))  <span class="co"># 134 floor space values</span>
+nfs &lt;-<span class="st"> </span><span class="kw">length</span>(<span class="kw">unique</span>(munich<span class="op">$</span>fsize))  <span class="co"># 134 floor space values</span>
 
 <span class="co"># Calculate zeta values associated with the covariate</span>
-zeta_fs &lt;-<span class="st"> </span><span class="kw">set_zeta</span>(<span class="dt">yvec =</span> munich$rent, <span class="dt">linkfun =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">ncell =</span> nfs, <span class="dt">alpha=</span><span class="fl">0.05</span>, <span class="dt">order=</span><span class="dv">2</span>)</code></pre></div>
+zeta_fs &lt;-<span class="st"> </span><span class="kw">set_zeta</span>(<span class="dt">yvec =</span> munich<span class="op">$</span>rent, <span class="dt">linkfun =</span> <span class="st">&quot;identity&quot;</span>, <span class="dt">ncell =</span> nfs, <span class="dt">alpha=</span><span class="fl">0.05</span>, <span class="dt">order=</span><span class="dv">2</span>)</code></pre></div>
 </div>
 <div id="run-models" class="section level3">
 <h3>Run Models</h3>
-<p>As with other examples in Faulkner and Minin (2018), we will fit three separate models, where each has a different configuration for the prior distributions on the order-2 differences in latent function values (normal, Laplace, and horseshoe). We will use se The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the <code>spmrf</code> function. Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.</p>
+<p>As with other examples in Faulkner and Minin (2018), we will fit three separate models, where each has a different configuration for the prior distributions on the order-2 differences in latent function values (normal, Laplace, and horseshoe). The following code will set up a list of parameters to keep in the output, set up some model run parameters, and will run the models with the <code>spmrf</code> function. Then the posterior samples are extracted into an array and posterior median and 95% Bayesian credible intervals are calculated for the theta (latent trend) parameters.</p>
 <p>Note that with 2,035 observations and with second order models these will take quite awhile to run. The code below sets up the models to run in sequence and the chains to run in sequence within each model. When I ran these models, the normal model took about 19 minutes to run per chain, the Laplace model about 25 minutes per chain, and the horseshoe about 96 minutes per chain. The total time to run these three models in sequence was about 9.3 hours. Of course results will differ depending on your computer set up. If you are using a computer that has multiple processer cores you may consider trying to run the chains in paralell as described in the <a href="introduction_to_spmrf.html">Introduction to the spmrf package</a> vignette.</p>
 <p>Also note that the difficult posterior terrain induced by the horseshoe model requires adjustment of some of the tuning parameters for the NUTS algorithm in <code>stan</code> to allow better adaptation during warmup and subsequently better performance during sampling. Divergent transitions after warmup may still occur, but a small number of them is not a problem if other posterior diagnostics look acceptable.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
@@ -138,7 +138,7 @@ nchain &lt;-<span class="st"> </span><span class="dv">4</span>
 ntotsamp &lt;-<span class="st"> </span><span class="dv">2500</span>
 nthin &lt;-<span class="st"> </span><span class="dv">5</span>
 nburn &lt;-<span class="st"> </span><span class="dv">1500</span>
-niter &lt;-<span class="st"> </span>(ntotsamp/nchain)*nthin +<span class="st"> </span>nburn
+niter &lt;-<span class="st"> </span>(ntotsamp<span class="op">/</span>nchain)<span class="op">*</span>nthin <span class="op">+</span><span class="st"> </span>nburn
 
 <span class="co"># Run models</span>
 mfit.N &lt;-<span class="st"> </span><span class="kw">spmrf</span>(<span class="dt">prior=</span><span class="st">&quot;normal&quot;</span>, <span class="dt">likelihood=</span><span class="st">&quot;normal&quot;</span>, <span class="dt">order=</span><span class="dv">2</span>, <span class="dt">data=</span>mun_dat, <span class="dt">par=</span>pars.N, 
@@ -176,7 +176,7 @@ th.H &lt;-<span class="st"> </span><span class="kw">extract_theta</span>(mfit.H)
 <h2>Posterior Plots</h2>
 <p>Now we use the <code>plot_trend</code> function from the <code>spmrf</code> package to plot the posterior medians and 95% credible intervals for the three models along with the data points. See the documentation for <code>plot_trend</code> for more details on the available options. The code below produces a PNG file, but you can simply pull out the calls to <code>plot_trend</code> for your own use.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># make variable with unique floor sizes sorted</span>
-ufsize &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">unique</span>(munich$fsize))
+ufsize &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">unique</span>(munich<span class="op">$</span>fsize))
 
 <span class="co"># set range of y-axis </span>
 yrng &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">15</span>)

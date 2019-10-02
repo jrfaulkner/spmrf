@@ -4,7 +4,8 @@
 \alias{bottleNeck_traj}
 \title{Bottleneck trajectory}
 \usage{
-bottleNeck_traj(t, ne.max = 100, ne.min = 10, bstart = 2, bend = 1, ...)
+bottleNeck_traj(t, ne.max = 100, ne.min = 10, bstart = 2, bend = 1,
+  ...)
 }
 \description{
 Piecewise constant trajectory with two levels where the lower level represents a population bottleneck.

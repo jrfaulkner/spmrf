@@ -53,9 +53,9 @@
 #  
 #  # Run models
 #  fit.G <- spmrf(prior="normal", likelihood="coalescent", order=1, data=cdat, par=pars.G,
-#  					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=12), zeta=zeta)
+#  					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=14), zeta=zeta)
 #  fit.H <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=cdat, par=pars.H,
-#  					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=12), zeta=zeta)
+#  					chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=14), zeta=zeta)
 #  
 #  # Extract posterior draws
 #  pout.G <- as.array(fit.G)
@@ -131,9 +131,9 @@
 #  niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run
 #  
 #  # Run models
-#  fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=12), zeta=zeta.h)
+#  fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=14), zeta=zeta.h)
 #  
-#  fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=12), zeta=zeta.h)
+#  fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=14), zeta=zeta.h)
 #  
 #  # Extract posterior draws
 #  pout.Gh <- as.array(fit.Gh)
