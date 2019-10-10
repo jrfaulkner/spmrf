@@ -7,7 +7,8 @@
 spmrf(prior = "horseshoe", likelihood = "normal", order = 1,
   zeta = 0.01, fit = NA, data, pars = NA, chains = 4,
   iter = 2000, warmup = floor(iter/2), thin = 1,
-  control = list(adapt_delta = 0.95, max_treedepth = 12), ...)
+  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  save.loglik = FALSE, ...)
 }
 \arguments{
 \item{prior}{A character string specifying which prior to use on order-\emph{k} differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.}
@@ -31,6 +32,8 @@ spmrf(prior = "horseshoe", likelihood = "normal", order = 1,
 \item{warmup}{A positive integer specifying number of warmup (aka burnin) iterations. This also specifies the number of iterations used for stepsize adaptation, so warmup samples should not be used for inference. The number of warmup should not be larger than \code{iter} and the default is \code{iter}/2.}
 
 \item{thin}{A positive integer specifying the period for saving sample; defaults to 1.}
+
+\item{save.loglik}{Logical flag for whether to calculate the individual components of the log-likelihood for use in calculating WAIC or LOOIC with the \code{loo} package. Default is FALSE.}
 
 \item{...}{Additional arguments passed to \code{rstan::stan}.  Do not include \code{file}, \code{model_code}, or \code{init} in this list.}
 }

@@ -5,13 +5,14 @@
 #' @param likelihood A character string specifying the probability distribution of the observation variable. Current choices are "normal", "poisson", "binomial", and "coalescent".
 #' @param order Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.
 #' @param zeta The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.
+#' @param save.loglik Logical flag for whether to calculate the individual components of the log-likelihood for use in calculating WAIC or LOOIC with the \code{loo} package. Default is FALSE.
 #' @return A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
 #' @details This function can be used to generate a text string containing code in the \code{stan} model syntax.  This function is called by the \code{spmrf} function internally, so it is not necessary to use \code{get_model} external to \code{spmrf}.
 #' @seealso \code{\link{spmrf}},  \code{\link[rstan]{stan}}, \code{\link{get_init}}
 #' @export
 
 
-get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.01){
+get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.01, save.loglik=FALSE){
 	# prior: ("horseshoe", "laplace", "normal")
 	# likelihood: ("normal", "poisson", "binomial", "coalescent")
 	# order: (1, 2, 3)
@@ -76,6 +77,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -126,6 +129,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -174,6 +179,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -238,6 +245,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -300,6 +309,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -355,6 +366,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -418,6 +431,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+   
+   LOGLIKCALC
 	'
 
 
@@ -478,6 +493,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 
@@ -532,6 +549,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 		zdelta ~ normal(0, 1);
 		LIKESTATE
 	  }
+
+   LOGLIKCALC
 	'
 
 	
@@ -546,13 +565,25 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	    sll = sum(ll);
 	    return sll ;
 	  }
-	
-	}
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+	  vector [nc] ll;
+		vector [nci] subll;
+	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+	   for (j in 1:nci){
+	     subll[j] = sum(ll[cstr[j]:cnd[j]]);
+		  }
+	    return subll ;
+    }
+ }
 	
 	data {
 	  int <lower=1> J; //number of grid points (theta params)
 	  int <lower=1> N; //number of grid subsections
 	  vector <lower=0>[N] y; //auxillary coal indicator
+    int <lower=1> coalind[N]; // id variable for coalscent number
+    int <lower=1> ncoal;  // number of coalescent events
+    int <lower=1>  cstart[ncoal]; //indices for coal interval starts
+    int <lower=1> cend[ncoal] ; //indices for coal interval ends
 	  int <lower=1>  gridrep [J]; //number of reps per theta
 	  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
 	  vector [N] dalpha; //delta alpha - subgrid widths 
@@ -592,6 +623,8 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	  zdelta ~ normal(0, 1);
 	  target += coal_loglik_lp(ftheta, y, N, Aik, dalpha); 
 	} 
+
+LOGLIKCALC
 	'
 	
 ## Coalescent -- Horseshoe Order 1
@@ -604,17 +637,31 @@ H_1_temp_coal <- '
       sll = sum(ll);
       return sll ;
     }
-  }
-
- data {
-  int <lower=1> J; //number of grid points (theta params)
-  int <lower=1> N; //number of grid subsections
-  vector <lower=0>[N] y; //auxillary coal indicator
-  int <lower=1>  gridrep [J]; //number of reps per theta
-  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
-  vector [N] dalpha; //delta alpha - subgrid widths 
-  real log_mu; //mle for const Ne on log scale
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+	  vector [nc] ll;
+		vector [nci] subll;
+	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+	   for (j in 1:nci){
+	     subll[j] = sum(ll[cstr[j]:cnd[j]]);
+		  }
+	    return subll ;
+    }
  }
+	
+	data {
+	  int <lower=1> J; //number of grid points (theta params)
+	  int <lower=1> N; //number of grid subsections
+	  vector <lower=0>[N] y; //auxillary coal indicator
+    int <lower=1> coalind[N]; // id variable for coalscent number
+    int <lower=1> ncoal;  // number of coalescent events
+    int <lower=1>  cstart[ncoal]; //indices for coal interval starts
+    int <lower=1> cend[ncoal] ; //indices for coal interval ends
+	  int <lower=1>  gridrep [J]; //number of reps per theta
+	  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+	  vector [N] dalpha; //delta alpha - subgrid widths 
+	  real log_mu; //mle for const Ne on log scale
+	 }
+	
 
  parameters {
   vector [J-1] zdelta;
@@ -652,7 +699,9 @@ H_1_temp_coal <- '
   ztheta1 ~ normal(log_mu, 10);
   zdelta ~ normal(0, 1);
   target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
-} 
+ } 
+
+LOGLIKCALC
 '
 
 ## Coalescent -- GMRF Order 2
@@ -665,17 +714,31 @@ N_2_temp_coal <- '
     sll = sum(ll);
     return sll ;
   }
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+	  vector [nc] ll;
+		vector [nci] subll;
+	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+	   for (j in 1:nci){
+	     subll[j] = sum(ll[cstr[j]:cnd[j]]);
+		  }
+	    return subll ;
+    }
  }
-
- data {
-  int <lower=1> J; //number of grid points (theta params)
-  int <lower=1> N; //number of grid subsections
-  vector <lower=0>[N] y; //auxillary coal indicator
-  int <lower=1>  gridrep [J]; //number of reps per theta
-  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
-  vector [N] dalpha; //delta alpha - subgrid widths 
-  real log_mu; //mle for const Ne on log scale
- }
+	
+	data {
+	  int <lower=1> J; //number of grid points (theta params)
+	  int <lower=1> N; //number of grid subsections
+	  vector <lower=0>[N] y; //auxillary coal indicator
+    int <lower=1> coalind[N]; // id variable for coalscent number
+    int <lower=1> ncoal;  // number of coalescent events
+    int <lower=1>  cstart[ncoal]; //indices for coal interval starts
+    int <lower=1> cend[ncoal] ; //indices for coal interval ends
+	  int <lower=1>  gridrep [J]; //number of reps per theta
+	  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+	  vector [N] dalpha; //delta alpha - subgrid widths 
+	  real log_mu; //mle for const Ne on log scale
+	 }
+	
 
  parameters {
   vector [J-1] zdelta;
@@ -712,6 +775,8 @@ N_2_temp_coal <- '
   zdelta ~ normal(0, 1);
   target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
  }  
+
+LOGLIKCALC
 '
 
 ## Coalescent -- Horseshoe Order 2
@@ -724,17 +789,31 @@ H_2_temp_coal <- '
     sll = sum(ll);
     return sll ;
   }
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+	  vector [nc] ll;
+		vector [nci] subll;
+	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
+	   for (j in 1:nci){
+	     subll[j] = sum(ll[cstr[j]:cnd[j]]);
+		  }
+	    return subll ;
+    }
  }
-
- data {
-  int <lower=1> J; //number of grid points (theta params)
-  int <lower=1> N; //number of grid subsections
-  vector <lower=0>[N] y; //auxillary coal indicator
-  int <lower=1>  gridrep [J]; //number of reps per theta
-  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
-  vector [N] dalpha; //delta alpha - subgrid widths 
-  real log_mu; //mle for const Ne on log scale
- }
+	
+	data {
+	  int <lower=1> J; //number of grid points (theta params)
+	  int <lower=1> N; //number of grid subsections
+	  vector <lower=0>[N] y; //auxillary coal indicator
+    int <lower=1> coalind[N]; // id variable for coalscent number
+    int <lower=1> ncoal;  // number of coalescent events
+    int <lower=1>  cstart[ncoal]; //indices for coal interval starts
+    int <lower=1> cend[ncoal] ; //indices for coal interval ends
+	  int <lower=1>  gridrep [J]; //number of reps per theta
+	  vector <lower=0> [N] Aik; // active lineage combinatoric coefficient
+	  vector [N] dalpha; //delta alpha - subgrid widths 
+	  real log_mu; //mle for const Ne on log scale
+	 }
+	
 
  parameters {
   vector [J-1] zdelta;
@@ -779,6 +858,8 @@ H_2_temp_coal <- '
   zdelta ~ normal(0, 1);
   target += coal_loglik_lp(ftheta, y, N, Aik, dalpha);
  } 
+LOGLIKCALC
+
 '
 
 	
@@ -811,7 +892,18 @@ H_2_temp_coal <- '
 		tmp.b <- sub("//SIGSET", "sigma = 5.0*tan(zsigma*pi()/2);", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "zsigma ~ uniform(0,1); ", x=tmp.b)
 		tmp.b <- sub("LIKESTATE" , "for (i in 1:N){\n y[i] ~ normal(theta[xrank1[i]], sigma); \n}\n", x=tmp.b)
-	}
+		if (save.loglik==TRUE) {
+		  tmp.txt <- ' generated quantities {
+     vector[N] log_lik;
+     for (i in 1:N){
+        log_lik[i] =  normal_lpdf(y[i] | theta[xrank1[i]], sigma);
+     }
+   }
+		'
+		  tmp.b <- sub(pattern="LOGLIKCALC", replacement=tmp.txt, x=tmp.b)
+	  }
+} 
+	
 	if (likelihood=="poisson"){
 		tmp.b <- sub("YSTATE", "int <lower=0> y[N];", x=tmp.a)
 		tmp.b <- sub("//LGYSTATE", "real logy[N];\n real ry[N]; \n for (j in 1:N) {\n logy[j] = log(y[j]+0.5);\n ry[j] = 1.0*y[j]; \n}\n", x=tmp.b)
@@ -823,8 +915,18 @@ H_2_temp_coal <- '
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "", x=tmp.b)
-
+   if (save.loglik==TRUE) {
+		  tmp.txt <- ' generated quantities {
+     vector[N] log_lik;
+     for (i in 1:N){
+        log_lik[i] =  poisson_log_lpmf(y[i] | theta[xrank1[i]]);
+     }
+   }
+		'
+		  tmp.b <- sub(pattern="LOGLIKCALC", replacement=tmp.txt, x=tmp.b)
+	  }
 	}
+
 	bintrans <- 'real <lower=0,upper=1> pp[N];
 	real logp[N];
 
@@ -847,29 +949,43 @@ H_2_temp_coal <- '
 		tmp.b <- sub("//SIGTPARM", "", x=tmp.b)
 		tmp.b <- sub("//SIGSET", "", x=tmp.b)
 		tmp.b <- sub("//ZSIGSTATE" , "", x=tmp.b)
+    if (save.loglik==TRUE) {
+		  tmp.txt <- ' generated quantities {
+     vector[N] log_lik;
+     for (i in 1:N){
+        log_lik[i] =  binomial_logit_lpmf(y[i] | sizeN[i], theta[xrank1[i]]);
+     }
+   }
+		'
+		  tmp.b <- sub(pattern="LOGLIKCALC", replacement=tmp.txt, x=tmp.b)
+	  }
 	}
 	
-	if (likelihood=="coalescent" & prior=="normal" & order==1) tmp.b <- N_1_temp_coal
-	if (likelihood=="coalescent" & prior=="normal" & order==2) tmp.b <- N_2_temp_coal
-	if (likelihood=="coalescent" & prior=="horseshoe" & order==1) tmp.b <- H_1_temp_coal
-	if (likelihood=="coalescent" & prior=="horseshoe" & order==2) tmp.b <- H_2_temp_coal
-	
+	if (likelihood=="coalescent") {
+	  if (prior=="normal" & order==1) tmp.b <- N_1_temp_coal
+	  if (prior=="normal" & order==2) tmp.b <- N_2_temp_coal
+	  if (prior=="horseshoe" & order==1) tmp.b <- H_1_temp_coal
+	  if (prior=="horseshoe" & order==2) tmp.b <- H_2_temp_coal
+    if (save.loglik==TRUE) {
+		  tmp.txt <- ' generated quantities {
+     vector[ncoal] log_lik;
+     log_lik = coal_loglikV(ftheta, y, N, Aik, dalpha, ncoal, cstart, cend);
+   }
+		'
+		  tmp.b <- sub(pattern="LOGLIKCALC", replacement=tmp.txt, x=tmp.b)
+	  }
+	} 	
 	## replace gamma
 	tmp.c <- sub(pattern="ZETAVAL", replacement=zeta, x=tmp.b)
+	
+	if (save.loglik==FALSE) {
+		tmp.txt <- ' 
+		'
+		tmp.c <- sub(pattern="LOGLIKCALC", replacement=tmp.txt, x=tmp.c)
+	}
+
 	return(tmp.c)
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

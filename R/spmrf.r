@@ -12,6 +12,7 @@
 #' @param iter A positive integer specifying how many iterations for each chain (including warmup). The default is 2000.
 #' @param warmup A positive integer specifying number of warmup (aka burnin) iterations. This also specifies the number of iterations used for stepsize adaptation, so warmup samples should not be used for inference. The number of warmup should not be larger than \code{iter} and the default is \code{iter}/2.
 #' @param thin A positive integer specifying the period for saving sample; defaults to 1.
+#' @param save.loglik Logical flag for whether to calculate the individual components of the log-likelihood for use in calculating WAIC or LOOIC with the \code{loo} package. Default is FALSE.
 #' @param ... Additional arguments passed to \code{rstan::stan}.  Do not include \code{file}, \code{model_code}, or \code{init} in this list.
 #'
 #' @details This function first internally creates \code{stan} model code and a function to generate initial parameter seeds using the information specified in the \code{prior}, \code{likelihood}, \code{order}, and \code{zeta} arguments.  It then passes these to the \code{stan} function.  The \code{spmrf} function will take additional arguments passed to \code{stan} \emph{except for} the arguments \code{file}, \code{model_code}, and \code{init}.  These arguments are not accepted because they may conflict with model forms expected by \code{spmrf}.  See the \code{stan} function documentation for more details.
@@ -30,7 +31,7 @@
 #' @export
 
 
-spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fit=NA, data, pars=NA, chains=4, iter=2000, warmup=floor(iter/2), thin=1, control=list(adapt_delta=0.95, max_treedepth=12), ...)  {
+spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fit=NA, data, pars=NA, chains=4, iter=2000, warmup=floor(iter/2), thin=1, control=list(adapt_delta=0.95, max_treedepth=12), save.loglik=FALSE, ...)  {
 
 		# check for rstan
 		 if (!requireNamespace("rstan", quietly = TRUE)) {
@@ -99,7 +100,7 @@ spmrf <- function(prior="horseshoe", likelihood="normal", order=1, zeta=0.01, fi
 		}
 		
 		tmp.dat <<- data
-	  mcode <- get_model(prior=prior, likelihood=likelihood, order=order, zeta=zeta)
+	  mcode <- get_model(prior=prior, likelihood=likelihood, order=order, zeta=zeta, save.loglik=save.loglik)
 	  finits <- get_init(prior=prior, likelihood=likelihood, order=order)
 
 	  mname <- paste(prior, likelihood, order, sep="_")

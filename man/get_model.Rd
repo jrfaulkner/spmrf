@@ -5,7 +5,7 @@
 \title{Generate model code for passage to stan}
 \usage{
 get_model(prior = "horseshoe", likelihood = "normal", order = 1,
-  zeta = 0.01)
+  zeta = 0.01, save.loglik = FALSE)
 }
 \arguments{
 \item{prior}{A character string specifying which prior to use on order-k differences. Choices are "horseshoe", "laplace", and "normal". Note that "laplace" priors are currently not available for coalescent likelihoods.}
@@ -15,6 +15,8 @@ get_model(prior = "horseshoe", likelihood = "normal", order = 1,
 \item{order}{Numeric value specifying order of differencing (1, 2, or 3). Note that order 3 is currently not available for coalescent likelihoods.}
 
 \item{zeta}{The hyperparameter for the global smoothing parameter gamma.  This is the scale parameter of a half-Cauchy distribution.  Smaller values will result in more smoothing depending on the prior specification and the strength of the data. Values must be > 0.}
+
+\item{save.loglik}{Logical flag for whether to calculate the individual components of the log-likelihood for use in calculating WAIC or LOOIC with the \code{loo} package. Default is FALSE.}
 }
 \value{
 A character string of code describing the model of interest for passage to the function \code{stan} in the \code{rstan} package.
