@@ -565,7 +565,7 @@ get_model <- function(prior="horseshoe",  likelihood="normal", order=1,  zeta=0.
 	    sll = sum(ll);
 	    return sll ;
 	  }
-   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[] cnd ) {
 	  vector [nc] ll;
 		vector [nci] subll;
 	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
@@ -637,7 +637,7 @@ H_1_temp_coal <- '
       sll = sum(ll);
       return sll ;
     }
-   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[] cnd ) {
 	  vector [nc] ll;
 		vector [nci] subll;
 	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
@@ -714,7 +714,7 @@ N_2_temp_coal <- '
     sll = sum(ll);
     return sll ;
   }
-   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[] cnd ) {
 	  vector [nc] ll;
 		vector [nci] subll;
 	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 
@@ -789,7 +789,7 @@ H_2_temp_coal <- '
     sll = sum(ll);
     return sll ;
   }
-   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[]     cnd ) {
+   vector coal_loglikV(vector ft, vector yy, int nc, vector aik, vector da, int nci, int[] cstr, int[] cnd ) {
 	  vector [nc] ll;
 		vector [nci] subll;
 	   ll = -1.0*yy .* ft - da .* aik .* exp(-ft); 

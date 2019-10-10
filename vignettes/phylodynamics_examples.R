@@ -127,13 +127,13 @@
 #  nchain <- 4    #number of chains
 #  ntotsamp <- 3000  #total number of samples to keep across all chains
 #  nthin <- 1        #thinning level
-#  nburn <- 1000     #warm-up / burn-in iterations per chain
+#  nburn <- 1500     #warm-up / burn-in iterations per chain
 #  niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run
 #  
 #  # Run models
-#  fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=14), zeta=zeta.h)
+#  fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=15), zeta=zeta.h)
 #  
-#  fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=14), zeta=zeta.h)
+#  fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h)
 #  
 #  # Extract posterior draws
 #  pout.Gh <- as.array(fit.Gh)
@@ -172,5 +172,57 @@
 #   mtext(side=2, outer=T, line=1, text="Effective population size", font=2, cex=0.8)
 #  dev.off()
 #  
+#  
+
+## ----eval=FALSE----------------------------------------------------------
+#  
+#  library(loo)
+#  
+#  # Set hyperparameters for global scale
+#  zeta.h1 <- set_zeta_phylo(phylo = hcvlist, ncell = 75, alpha = 0.01, order = 1)
+#  zeta.h2 <- set_zeta_phylo(phylo = hcvlist, ncell = 75, alpha = 0.01, order = 2)
+#  
+#  # Parameters to keep
+#  pars.Ghw <- c("theta", "gam", "log_lik")
+#  pars.Hhw <- c("theta", "tau", "gam", "log_lik")
+#  
+#  # MCMC settings
+#  nchain <- 4    #number of chains
+#  ntotsamp <- 3000  #total number of samples to keep across all chains
+#  nthin <- 1        #thinning level
+#  nburn <- 1500     #warm-up / burn-in iterations per chain
+#  niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run per chain
+#  
+#  # --------  Run models ---------
+#  # -- first-order
+#  fit.Gh1 <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.Ghw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h1, save.loglik=TRUE)
+#  
+#  fit.Hh1 <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.Hhw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h1, save.loglik=TRUE)
+#  
+#  # -- second-order
+#  fit.Gh2 <- spmrf(prior="normal", likelihood="coalescent", order=2, data=hdat, par=pars.Ghw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h2, save.loglik=TRUE)
+#  
+#  fit.Hh2 <- spmrf(prior="horseshoe", likelihood="coalescent", order=2, data=hdat, par=pars.Hhw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h2, save.loglik=TRUE)
+#  
+#  # ------- Calculate WAIC ----------------
+#  # extract log-likelihoods
+#  log_lik_G1 <- extract_log_lik(fit.Gh1)
+#  log_lik_H1 <- extract_log_lik(fit.Hh1)
+#  log_lik_G2 <- extract_log_lik(fit.Gh2)
+#  log_lik_H2 <- extract_log_lik(fit.Hh2)
+#  
+#  waic_G1 <- waic(log_lik_G1)
+#  waic_H1 <- waic(log_lik_H1)
+#  waic_G2 <- waic(log_lik_G2)
+#  waic_H2 <- waic(log_lik_H2)
+#  
+#  waic_G1$estimates
+#  waic_H1$estimates
+#  waic_G2$estimates
+#  waic_H2$estimates
+#  
+#  print(compare(waic_G1, waic_H1), digits = 2)
+#  print(compare(waic_G2, waic_H2), digits = 2)
+#  print(compare(waic_H1, waic_H2), digits = 2)
 #  
 

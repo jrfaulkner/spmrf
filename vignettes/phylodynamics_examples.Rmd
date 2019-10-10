@@ -187,13 +187,13 @@ pars.H <- c("theta", "tau", "gam")
 nchain <- 4    #number of chains
 ntotsamp <- 3000  #total number of samples to keep across all chains
 nthin <- 1        #thinning level
-nburn <- 1000     #warm-up / burn-in iterations per chain
+nburn <- 1500     #warm-up / burn-in iterations per chain
 niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run
 
 # Run models
-fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=14), zeta=zeta.h)
+fit.Gh <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.G, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.98, max_treedepth=15), zeta=zeta.h)
 
-fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=14), zeta=zeta.h)
+fit.Hh <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.H, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h)
 
 # Extract posterior draws
 pout.Gh <- as.array(fit.Gh)
@@ -251,8 +251,72 @@ dev.off()
 <img src="figure/hcv_posterior_plots.png" height=350 width=700 />
 
 
+##Calculating Information Criteria
+
+We can take advantage of the `loo` package (Vehtari et al. 2019) to calculate information criteria such as WAIC (Watanabe information criterion) and LOOIC (leave one out information criterion) for purposes of model comparison (see Vehtari et al. (2017)  methods used in the `loo` package).  To do this, we need to explicitly calculate the log-likelihood values associated with the individual observational units in the model.  Note that the default in `spmrf` is not to calcualte or save these individual pointwise likelihood components due to the additional memory and processing time required.  The `loo` packages uses these individual likelihood components in the calculations of WAIC and LOOIC.  We will demonstrate an example of this using the HCV data.  Before moving forward you will need to install the `loo` package if you have not already.
+
+Building on the code used for the HCV example in the previous section, we simply need to tell the `spmrf` function to calculate the individual log-likelihood values, which is done by specifying the argument save.loglik=TRUE, and specify the resulting "log_lik" variable in our list of parameters to keep.  Here we fit both the first-order and second-order models to to the HCV data to allow a broader set of models to compare. 
+
+```{r eval=FALSE}
+
+library(loo)
+
+# Set hyperparameters for global scale
+zeta.h1 <- set_zeta_phylo(phylo = hcvlist, ncell = 75, alpha = 0.01, order = 1)
+zeta.h2 <- set_zeta_phylo(phylo = hcvlist, ncell = 75, alpha = 0.01, order = 2)
+
+# Parameters to keep
+pars.Ghw <- c("theta", "gam", "log_lik") 
+pars.Hhw <- c("theta", "tau", "gam", "log_lik") 
+
+# MCMC settings
+nchain <- 4    #number of chains
+ntotsamp <- 3000  #total number of samples to keep across all chains
+nthin <- 1        #thinning level
+nburn <- 1500     #warm-up / burn-in iterations per chain
+niter <- (ntotsamp/nchain)*nthin + nburn  #total iterations to run per chain
+
+# --------  Run models ---------
+# -- first-order
+fit.Gh1 <- spmrf(prior="normal", likelihood="coalescent", order=1, data=hdat, par=pars.Ghw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h1, save.loglik=TRUE)
+
+fit.Hh1 <- spmrf(prior="horseshoe", likelihood="coalescent", order=1, data=hdat, par=pars.Hhw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h1, save.loglik=TRUE)
+
+# -- second-order
+fit.Gh2 <- spmrf(prior="normal", likelihood="coalescent", order=2, data=hdat, par=pars.Ghw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h2, save.loglik=TRUE)
+
+fit.Hh2 <- spmrf(prior="horseshoe", likelihood="coalescent", order=2, data=hdat, par=pars.Hhw, chains=nchain, warmup=nburn, thin=nthin, iter=niter, control=list(adapt_delta=0.995, max_treedepth=15), zeta=zeta.h2, save.loglik=TRUE)
+
+# ------- Calculate WAIC ---------------- 
+# extract log-likelihoods
+log_lik_G1 <- extract_log_lik(fit.Gh1)
+log_lik_H1 <- extract_log_lik(fit.Hh1)
+log_lik_G2 <- extract_log_lik(fit.Gh2)
+log_lik_H2 <- extract_log_lik(fit.Hh2)
+
+waic_G1 <- waic(log_lik_G1)
+waic_H1 <- waic(log_lik_H1)
+waic_G2 <- waic(log_lik_G2)
+waic_H2 <- waic(log_lik_H2)
+
+waic_G1$estimates
+waic_H1$estimates
+waic_G2$estimates
+waic_H2$estimates
+
+print(compare(waic_G1, waic_H1), digits = 2)
+print(compare(waic_G2, waic_H2), digits = 2)
+print(compare(waic_H1, waic_H2), digits = 2)
+
+```
+
+The results for this particular data set indicate that the order-1 GMRF model had a lower WAIC than the order-1 HSMRF model, but the order-2 HSMRF model had a lower WAIC than the order-2 GMRF model.  When comparing HSMRF models, the order-2 would be slightly preferred over the order-1. Note that the estimated standard errors on these WAIC estimates are fairly large, so there is really no practical difference between models in terms of these metrics.
 
 
 ## References
 
 Faulkner, J.R., A.F. Magee, B. Shapiro, and V.N. Minin. 2018. Horseshoe-based Bayesian nonparametric estimation of effective population size trajectories. Preprint [arXiv:1808.04401v2 [stat.ME]](https://arxiv.org/abs/1808.04401)
+
+Vehtari, A., A. Gelman, and J. Gabry. 2017. Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. Statistics and Computing 27(5):1413-1432. 
+
+Vehtari, A., J. Gabry, Y. Yao, and A. Gelman. 2019. loo: efficient leave-one-out cross-validation and WAIC for Bayesian models. R package version 2.1.0. https://CRAN.R-project.org/package=loo.

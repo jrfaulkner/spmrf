@@ -26,6 +26,8 @@ A list containing
 \item{\code{coalind}} { vector of length \code{N} containing indicator for the coalescent event associated with each subgrid cell}
 \item{\code{ncoal}} { number of coalescent times, which is equal to the number of samples minus 1}
 \item{\code{ncoalv}} { vector of length \code{J} containing the number of coalescent events in each grid cell }
+\item{\code{cstart}} { vector of length \code{ncoal} containing the index of the starting subgrid cell in the range of subgrid cells covering the time between coalescent events }
+\item{\code{cend}} {vector of length \code{ncoal} containing the index of the ending subgrid cell in the range of subgrid cells covering the time between coalescent events   }
 \item{\code{dalpha}}  { vector of length \code{N} containing the width of each subgrid cell }
 \item{\code{rep.idx}} { matrix of \code{J} by 2 where the first column contains for the index for the subgrid cell at which each grid cell starts and the second column contains the index for the subgrid cell at which each grid cell ends.  }
 \item{\code{log_mu}} { scalar value containing the natural log of the MLE for a constant population size estimated from the coalescent data}
