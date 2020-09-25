@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Bayesian Locally-Adaptive Nonparametric Smoothing with the `spmrf` Package"
 author: "James Faulkner"
-output: rmarkdown::github_document
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown_notangle}
